@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xumi Story. · 项目工作台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+/* [编辑区 6] 主题配色 / 圆角 —— 改这里可整站换肤 */
+:root{
+  --bg:#0d1017; --panel:#141922; --panel2:#1b2130; --panel3:#212939;
+  --line:#283040; --line2:#3a4457;
+  --txt:#e6e9ef; --txt2:#8d97a8; --txt3:#5a6478;
+  --blue:#4d9dff; --green:#3fd07a; --amber:#e5b23c; --red:#ff5f56; --purple:#a880ff;
+  --r:9px;
+}
+html,body{height:100%;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--bg);color:var(--txt);font-size:13px;overflow:hidden;}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:#2b3444;border-radius:5px;}
+::-webkit-scrollbar-thumb:hover{background:#3a4457;}
+::-webkit-scrollbar-track{background:transparent;}
+.hidden{display:none !important;}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+
+/* ============ 通用控件 ============ */
+.btn{font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid var(--line);
+  background:var(--panel2);color:#ccd3e0;cursor:pointer;white-space:nowrap;transition:.15s;}
+.btn:hover{background:#252d3d;border-color:var(--line2);}
+.btn.pri{background:linear-gradient(135deg,#2f7ce0,#4d9dff);border-color:#4d9dff;color:#fff;font-weight:600;}
+.btn.pri:hover{filter:brightness(1.12);}
+.btn.pri:disabled{opacity:.55;cursor:default;filter:none;}
+.btn.gh{background:transparent;}
+.btn.sm{padding:4px 9px;font-size:11.5px;}
+
+.chip{font-size:11.5px;padding:4px 9px;border-radius:20px;border:1px solid var(--line);
+  background:var(--panel2);color:#b9c2d2;cursor:pointer;transition:.13s;user-select:none;}
+.chip:hover{border-color:var(--line2);color:var(--txt);}
+.chip.on{background:#1e3050;border-color:var(--blue);color:#cfe4ff;}
+
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px;}
+.seg button{font-size:11.5px;padding:4px 10px;border-radius:6px;border:0;background:transparent;
+  color:var(--txt2);cursor:pointer;transition:.13s;white-space:nowrap;}
+.seg button.on{background:#2b3444;color:var(--txt);}
+
+select.sel{font-size:11.5px;background:var(--panel2);border:1px solid var(--line);color:#ccd3e0;
+  border-radius:7px;padding:5px 8px;cursor:pointer;outline:none;}
+
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:3px;
+  background:#2b3444;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:var(--blue);border:2px solid #0d1017;box-shadow:0 0 0 1px var(--blue);}
+
+.toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,14px);z-index:900;
+  background:#202838;border:1px solid var(--line2);border-radius:9px;padding:9px 16px;font-size:12.5px;
+  color:var(--txt);box-shadow:0 10px 34px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.22s;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+.toast.err{border-color:#6d3030;color:#ffc9c5;}
+
+/* ============ 视图 A：项目 Brief ============ */
+#briefView{height:100vh;overflow-y:auto;}
+.bnav{position:sticky;top:0;z-index:50;height:52px;background:rgba(13,16,23,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 24px;}
+.bnav .logo{font-size:14px;font-weight:800;letter-spacing:.02em;
+  background:linear-gradient(90deg,#4d9dff,#a880ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.bnav .crumb{font-size:12px;color:var(--txt2);}
+.bwrap{max-width:1040px;margin:0 auto;padding:26px 24px 80px;}
+
+.hero{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--panel);}
+.hero .cover{height:270px;position:relative;background:#161b25;}
+.hero .cover img{width:100%;height:100%;object-fit:cover;display:block;}
+.hero .cover .fade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,16,23,0) 40%,rgba(13,16,23,.92) 100%);}
+.hero .cover .tag{position:absolute;left:16px;top:16px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(13,16,23,.72);border:1px solid var(--line2);border-radius:5px;padding:4px 8px;color:#cfd7e4;}
+.hero .body{padding:16px 20px 20px;}
+.hero h1{font-size:24px;font-weight:800;letter-spacing:-.2px;margin-bottom:6px;}
+.hero .sub{font-size:12.5px;color:var(--txt2);margin-bottom:12px;}
+.hero .desc{font-size:13px;line-height:1.85;color:#c2cadb;max-width:760px;}
+.hero .metarow{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap;}
+.hero .tags{display:flex;gap:6px;flex-wrap:wrap;}
+.hero .tags span{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--panel2);
+  border:1px solid var(--line);color:#aab4c6;}
+.stat{display:flex;gap:22px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+.stat div b{display:block;font-size:17px;font-variant-numeric:tabular-nums;}
+.stat div i{font-style:normal;font-size:11px;color:var(--txt3);}
+
+.sec{margin-top:34px;}
+.sec h2{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.sec h2 em{font-style:normal;font-size:11px;color:var(--txt3);font-weight:400;}
+.sec .hint{font-size:11.5px;color:var(--txt3);margin-bottom:14px;line-height:1.7;}
+
+.tl{position:relative;padding-left:22px;}
+.tl:before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:1px;background:var(--line);}
+.tl .item{position:relative;padding:0 0 20px;}
+.tl .item:before{content:'';position:absolute;left:-19px;top:5px;width:9px;height:9px;border-radius:50%;
+  background:var(--panel2);border:2px solid var(--line2);}
+.tl .item.done:before{background:var(--green);border-color:#1d5c38;}
+.tl .item.now:before{background:var(--blue);border-color:#1e3f6d;box-shadow:0 0 0 4px rgba(77,157,255,.14);}
+.tl .t{font-size:12.5px;font-weight:600;margin-bottom:3px;display:flex;gap:8px;align-items:center;}
+.tl .t i{font-style:normal;font-size:10px;color:var(--txt3);font-weight:400;}
+.tl .d{font-size:12px;color:var(--txt2);line-height:1.75;}
+
+.plist{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--panel);}
+.pitem{border-bottom:1px solid var(--line);}
+.pitem:last-child{border-bottom:0;}
+.pitem .ph{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;transition:.13s;}
+.pitem .ph:hover{background:var(--panel2);}
+.pitem .no{font-size:11px;color:var(--txt3);width:34px;flex-shrink:0;font-variant-numeric:tabular-nums;}
+.pitem .pv{flex:1;font-size:12.5px;color:#c8d0de;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pitem .ar{font-size:10px;color:var(--txt3);transition:.15s;}
+.pitem.open .ar{transform:rotate(90deg);}
+.pitem .pd{display:none;padding:0 14px 14px 44px;}
+.pitem.open .pd{display:block;}
+.pitem .pd pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.85;
+  color:#b6c0d1;white-space:pre-wrap;word-break:break-word;background:#11151d;border:1px solid var(--line);
+  border-radius:8px;padding:11px 12px;}
+.pitem .pd .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;}
+.pitem .pd .plabel{font-size:10.5px;color:var(--txt3);letter-spacing:.05em;margin:11px 0 5px;}
+.pitem .pd .plabel:first-child{margin-top:0;}
+
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;}
+.wcard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);transition:.15s;}
+.wcard:hover{border-color:var(--line2);transform:translateY(-2px);}
+.wcard .th{height:104px;background:#161b25;}
+.wcard .th img{width:100%;height:100%;object-fit:cover;display:block;}
+.wcard .nm{padding:8px 10px 10px;}
+.wcard .nm b{display:block;font-size:12px;font-weight:600;margin-bottom:2px;}
+.wcard .nm i{font-style:normal;font-size:10.5px;color:var(--txt3);}
+.wgroup{margin-bottom:20px;}
+.wgroup h3{font-size:11px;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;}
+
+/* ============ 视图 B：Studio 三栏 ============ */
+#studioView{height:100vh;display:flex;flex-direction:column;}
+.topbar{height:48px;background:var(--panel);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;z-index:60;}
+.topbar .logo{font-size:13.5px;font-weight:800;background:linear-gradient(90deg,#4d9dff,#a880ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar .pname{font-size:12px;color:#ccd3e0;font-weight:600;}
+.topbar .sp{flex:1;}
+.av{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#3d5f9e,#a880ff);
+  border:1.5px solid var(--panel);margin-left:-7px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#fff;font-weight:700;}
+.avs{display:flex;padding-left:7px;}
+.cred{font-size:11px;color:var(--txt2);background:var(--panel2);border:1px solid var(--line);
+  border-radius:20px;padding:4px 10px;font-variant-numeric:tabular-nums;}
+.cred b{color:var(--txt);}
+
+/* ============ 视图 B：Xumi Story 工作台（文件树 + 素材详情） ============ */
+.work{display:flex;flex:1;min-height:0;}
+
+/* --- 左侧文件树 --- */
+.tree{width:256px;background:var(--panel);border-right:1px solid var(--line);display:flex;
+  flex-direction:column;flex-shrink:0;overflow-y:auto;padding:10px;}
+.tproj{display:flex;align-items:center;gap:10px;padding:8px 8px 14px;}
+.tproj .tav{width:38px;height:38px;border-radius:50%;overflow:hidden;background:var(--panel2);
+  border:1px solid var(--line2);flex-shrink:0;}
+.tproj .tav img{width:100%;height:100%;object-fit:cover;display:block;}
+.tproj .tn{min-width:0;}
+.tproj .tn b{display:block;font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tproj .tn i{font-style:normal;font-size:10px;color:var(--txt3);display:block;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+.titem{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12.5px;
+  color:#c3cad8;cursor:pointer;transition:.13s;user-select:none;}
+.titem:hover{background:var(--panel2);}
+.titem.on{background:#1e2836;color:#fff;}
+.titem .ico{width:18px;text-align:center;flex-shrink:0;}
+.titem .tl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.titem .tc{font-size:10.5px;color:var(--txt3);font-variant-numeric:tabular-nums;}
+.thd{padding:14px 10px 6px;font-size:10px;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;}
+.tfoot{margin-top:auto;padding:12px 10px 4px;font-size:10px;color:var(--txt3);border-top:1px solid var(--line);line-height:1.7;}
+
+/* --- 右侧文件展示区 --- */
+.farea{flex:1;min-width:0;overflow-y:auto;padding:16px 18px 26px;
+  background:radial-gradient(circle at 1px 1px,#1a202b 1px,transparent 0) 0 0/22px 22px;}
+.fhead{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
+.fhead b{font-size:15px;}
+.fhead span{font-size:11px;color:var(--txt3);}
+.fhead .sp{flex:1;}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.fcard{border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);
+  cursor:pointer;transition:.15s;}
+.fcard:hover{border-color:var(--line2);transform:translateY(-2px);}
+.fcard .th{height:112px;background:#161b25;position:relative;}
+.fcard .th img{width:100%;height:100%;object-fit:cover;display:block;}
+.fcard .vtag{position:absolute;right:6px;bottom:6px;font-size:9.5px;background:rgba(13,16,23,.82);
+  border-radius:4px;padding:1px 6px;color:#dfe5ef;}
+.fcard .nm{font-size:11.5px;padding:7px 9px 2px;color:#dde3ee;font-weight:600;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+.fcard .md{font-size:10px;padding:0 9px 8px;color:var(--txt3);}
+.fempty{padding:70px 0;text-align:center;color:var(--txt3);font-size:12px;}
+
+/* --- 素材详情页 --- */
+.detail{display:flex;gap:14px;height:calc(100vh - 80px);}
+.dmedia{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;
+  background:#0a0d13;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.dmedia img,.dmedia video{flex:1;width:100%;min-height:0;object-fit:contain;display:block;}
+.dback{position:absolute;left:10px;top:10px;z-index:5;font-size:11.5px;background:rgba(13,16,23,.8);
+  border:1px solid var(--line2);border-radius:6px;padding:4px 10px;color:#dfe5ef;cursor:pointer;}
+.dback:hover{border-color:var(--blue);}
+.novid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:11px;
+  color:var(--txt3);background:rgba(13,16,23,.75);border-radius:6px;padding:4px 10px;}
+.dbar{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(16,20,28,.92);
+  border-top:1px solid var(--line);font-size:10.5px;color:#cfd7e4;font-variant-numeric:tabular-nums;flex-shrink:0;}
+.dbar .sp{flex:1;}
+.track{flex:1;height:4px;border-radius:2px;background:#232b38;cursor:pointer;position:relative;}
+.track i{position:absolute;left:0;top:0;bottom:0;background:#d3f34b;border-radius:2px;width:0%;}
+.dinfo{width:302px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;padding:4px 2px 4px 0;}
+.duser{display:flex;align-items:center;gap:9px;padding-bottom:12px;}
+.duser .dav{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3d5f9e,#a880ff);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
+.duser .dn b{display:block;font-size:12.5px;}
+.duser .dn i{font-style:normal;font-size:10px;color:var(--txt3);}
+.duser .sp{flex:1;}
+.duser .dx{font-size:16px;color:var(--txt3);cursor:pointer;padding:0 6px;}
+.duser .dx:hover{color:var(--txt);}
+.dsec{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--txt3);letter-spacing:.08em;margin-bottom:8px;}
+.dsec span{flex:1;}
+.cpy{font-size:10.5px;padding:2px 9px;border-radius:5px;border:1px solid var(--line2);
+  background:var(--panel2);color:#cfd7e4;cursor:pointer;}
+.cpy:hover{border-color:var(--blue);color:#fff;}
+.dprompt{font-size:11.5px;line-height:1.8;color:#c9d2e0;background:var(--panel2);border:1px solid var(--line);
+  border-radius:9px;padding:10px 11px;max-height:190px;overflow:hidden;word-break:break-word;}
+.dprompt.open{max-height:none;}
+.dprompt .hl{color:#e4f56a;font-weight:600;}
+.dsee{font-size:11px;color:var(--txt3);padding:7px 2px;cursor:pointer;flex-shrink:0;}
+.dsee:hover{color:var(--blue);}
+.dtable{font-size:11.5px;}
+.dtable .row{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);}
+.dtable .row:last-child{border-bottom:0;}
+.dtable .k{width:70px;color:var(--txt3);flex-shrink:0;}
+.dtable .v{color:#d6dce8;word-break:break-word;}
+.dl{margin-top:14px;font-size:12.5px;font-weight:700;padding:9px 0;border:0;border-radius:8px;
+  cursor:pointer;color:#151a0d;background:#d3f34b;transition:.15s;}
+.dl:hover{filter:brightness(1.08);}
+</style>
+</head>
+<body>
+
+<!-- ==================== 视图 A：项目 Brief ==================== -->
+<div id="briefView">
+  <div class="bnav">
+    <div class="logo">Xumi Story.</div>
+    <div class="crumb">/ 项目 /</div>
+    <div class="crumb" id="crumbName" style="color:var(--txt);font-weight:600"></div>
+    <div style="flex:1"></div>
+    <button class="btn pri" data-act="goto-studio">进入工作台 →</button>
+  </div>
+  <div class="bwrap" id="briefBody"></div>
+</div>
+
+<!-- ==================== 视图 B：Xumi Story 工作台（文件树 + 素材展示 / 详情） ==================== -->
+<div id="studioView" class="hidden">
+  <div class="topbar">
+    <div class="logo">Xumi Story.</div>
+    <span style="color:var(--line2)">/</span>
+    <div class="pname" id="topName">—</div>
+    <div class="sp"></div>
+    <div class="cred">GPT 2.0 · Seedance 2.5</div>
+    <button class="btn sm" data-act="goto-brief">项目简介</button>
+  </div>
+
+  <div class="work">
+    <div class="tree" id="tree"></div>
+    <div class="farea" id="farea"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+ * 编辑速查表（Ctrl+F 搜「编辑区」直达，日常改动只需碰这几处）
+ *
+ *   [编辑区 1]  PROJECT            —— 项目名 / 简介 / 封面 / 标签 / 统计 / 时间线
+ *                                    · prompts：5 个 shot 的画面描述、首帧与视频提示词
+ *                                    · elements：Brief 页资产墙的图片与说明
+ *   [编辑区 2]  SUBJECTS           —— assets 文件夹里的 7 张主体图 + 各自提示词
+ *   [编辑区 3]  SHOT_FILES         —— 每个 shot 的素材清单与专属提示词（加素材只改这里）
+ *   [编辑区 4]  TREE               —— 左侧文件树的文件夹名称、顺序、增删 shot
+ *   [编辑区 5]  MP4                —— 成片视频路径
+ *   [编辑区 6]  :root（<style> 开头）—— 主题色 / 圆角 / 字号
+ *
+ *   图片都放 assets/ 目录；路径写错或文件不存在会自动显示占位渐变图，不会破图。
+ *   改完直接刷新浏览器即可，无需构建、无需安装依赖。
+ * ══════════════════════════════════════════════════════════════════════ */
+/* [编辑区 1] 项目基础信息 + prompts + elements */
+const PROJECT = {
+  name: '无明春山',
+  subtitle: '游戏衍生剧情片 · 中式志怪民俗恐怖短片',
+  desc: '古代中式山村中，年轻村女阿绣被村民选为祭品，吞下蛾翅后身体悄然异变。她在幽绿灯火与低声吟唱的召唤下，'
+      + '一步步走向祭台的人形蚕茧，最终在村民虔诚而僵硬的注视中完成蜕变。姐姐留下的蓝色绣花鞋串联起她童年的失落记忆，'
+      + '也让这场民俗献祭带上宿命轮回与诡谲哀伤的底色。',
+  cover: 'assets/无明春山-封面.webp',
+  tags: ['游戏运营', '志怪民俗', '电影写实', '国风写实', '低饱和青绿'],
+  stats: { shots: 7, elements: 8, duration: '2:16', models: 2 },
+  model: 'GPT 2.0（首帧） · Seedance 2.5（视频）',
+  timeline: [
+    { t: '剧本',     d: '四幕志怪短剧一次输入：起·她被选中 / 承·她在变化 / 转·她走进茧 / 合·蛾群升空与空茧，120 秒时间戳分镜与声音设计总则同步给出。', s: 'done' },
+    { t: '主体设定', d: 'GPT 2.0 生成 Elements：阿绣（三视图）、姐姐、幼年阿绣、阿绣的屋子、山村晒场祭台、干枯蛾翅、蓝色绣花鞋。', s: 'done' },
+    { t: '分镜表',   d: '10 镜分镜表《蛾仙选祭录》：画面描述、首帧图提示词、首尾帧 / 参考生视频提示词、主体列表与时长齐备，后续合并为 7 组成片镜头。', s: 'done' },
+    { t: '首帧生成', d: '按图片生成提示词产出 5 张分镜帧：统一低饱和青绿、潮湿雾气、轻微胶片颗粒、低调光。', s: 'done' },
+    { t: '视频生成', d: 'Seedance 2.5 首尾帧 / 参考生视频，单镜 4–30 秒；每个镜头先出多版非定稿再收敛到定稿，全程无 BGM，只用环境音与低频心跳。', s: 'now' },
+    { t: '成片',     d: '各定稿镜头按「切黑 + 音效延续」衔接，输出 2 分 16 秒成片《无明春山》。', s: '' }
+  ],
+  prompts: [
+    { no:'shot1', dur:'0:20',
+      text:'清晨雾锁晒场，千百茧串如白幕垂落，铜铃极远单响，空蚕茧细纹微动；村民列跪齐望，一只手把干蛾翅捧到阿绣掌心，她低头端详后仰头吞下，瞳孔里烛火微弱地跳了一下。',
+      first:'',
+      video:'中式志怪民俗恐怖，低饱和青绿主调与幽绿烛火暖点，轻微胶片颗粒、柔和质感，诡美虔诚氛围。无BGM。\n\n镜头1 [4.0s] 时间：清晨。[大远景/固定镜头] 雾锁山村晒场·黎明雾 被黎明浓雾笼罩，千百茧串如白幕垂落随风轻荡，远处铜铃悬于风中，空旷冷寂。\n\n镜头2 [2.0s] 时间：清晨。[特写/缓慢推近] 镜头推近空蚕茧的细密丝纹与微动，幽绿微光中铜铃极远单响。\n\n镜头1 [4.0s] 时间：清晨。[中景/固定镜头] 雾锁山村晒场·黎明雾 中村民列跪于祭台前，空蚕茧贴于心口，齐望同一方向。\n\n镜头2 [4.0s] 时间：清晨。[近景/缓慢推近] 推近一只捧空蚕茧的手与抬起的脸，木然而期待。\n\n镜头1 [4.0s] 时间：清晨。[中景/固定镜头] 一双手将干蛾翅掌心，她低头看，圆眼映烛火，嘴角扬起。\n\n镜头2 [4.0s] 时间：清晨。[特写/缓慢推近] 推近阿绣边缘，鳞粉微光沾指纹。',
+      params:['雾锁山村晒场','空蚕茧','阿绣','干蛾翅'] },
+    { no:'shot2', dur:'0:30',
+      text:'夜里阿绣独坐床边，指尖抚过颈侧浮起细密鳞纹，她凑近油灯细看露出欣喜；腕间无意识抽出湿丝越缠越紧，画外吟唱中瞳孔映出两点幽蓝蛾光，她起身走进门外夜雾，切黑。',
+      first:'',
+      video:'国风写实，中式志怪民俗恐怖气质，低饱和青绿与幽绿火点交错，潮湿空气、细微颗粒与压低的明暗反差共同制造克制却逼人的微恐感。无BGM。\n\n潮湿幽绿转微暖，极近特写为主＋手持微晃制造生理不适感；表现"身体已在变、她却以为是仙缘"的渐进微恐；变化只用皮肤、指尖、听觉细节，禁怪物/禁血腥/禁夸张变形/禁任何字幕。\n\n0-8s 夜里阿绣独坐床边，指尖抚过自己颈侧——指下浮起一层细密鳞纹，她凑近油灯细看，露出欣喜（潜台词：她把异变当成神迹）\n\n8-18s 她无意识抽出一缕生丝从自己腕间，越抽越长缠上手腕，丝线在皮肤上勒出浅痕她不察觉（音效：黏丝摩擦皮肤的细响）\n\n18-26s 她忽然侧耳，画面外传来空灵吟唱，镜头缓缓推向她逐渐失焦的眼——瞳孔里倒映的不是烛火，是两点幽蓝蛾光（微恐：感官已被替换）\n\n26-30s 她起身走向门外夜色，背影融入雾中，切黑（音效：赤足踏过湿石板）',
+      params:['阿绣的屋子','阿绣','油灯','蓝色绣花鞋'] },
+    { no:'shot3', dur:'0:30',
+      text:'夜祭台中央悬着巨大蚕茧，一线顶光落下；阿绣赤足走近，村民无声退开让路，捧着蓝烛的手微微颤抖；她回头望向人群露出麻木而纯粹的笑，仰面躺入茧中，湿丝层层缠覆。',
+      first:'',
+      video:'诡美压抑，冷调青绿＋一线顶光打在祭台中央的巨大蚕茧上；缓慢环绕＋极慢升降；村民静默注视如参加盛典。\n\n0-10s 祭台中央悬一枚巨大蚕茧，阿绣赤足走近，村民无声退开为她让出一条路，所有人捧着蓝色蜡烛的手微微颤抖（潜台词：无人阻止，因为都羡慕）\n\n10-20s 她回头望向人群，脸上是麻木而纯粹的笑，动作：手指自然舒展，没有一丝犹疑）\n\n20-28s 她仰面躺入茧中，湿丝自四壁生出层层缠覆，先没过手，再没过胸口，她始终安然微笑，眼睛望着上方那一线顶光（音效：黏丝缠绕的细密湿响，由近及远）\n\n28-30s 丝线覆过她眼睛前最后一帧，露出痛苦神色的一瞬间茧口彻底封合，切黑',
+      params:['山村祭台','巨大蚕茧','阿绣','蓝色蜡烛'] },
+    { no:'shot4', dur:'0:04',
+      text:'湿丝自四壁生出层层缠覆，覆过她眼睛前最后一帧露出惊恐神色，双眼睁大，一瞬间茧口彻底封合，切黑。',
+      first:'',
+      video:'诡美压抑，冷调青绿湿丝自生出层层缠覆 蚕丝覆过她眼睛前最后一帧，露出惊恐神色，眼睛睁大，一瞬间茧口彻底封合，切黑',
+      params:['人形茧壳','阿绣'] },
+    { no:'shot5', dur:'0:18 / 0:20',
+      text:'黑屏起：幼年阿绣收到姐姐送的蓝色绣花鞋，认真承诺带姐姐过好日子；姐姐走入浓雾被茧丝吞没，雾后非人暗影的黏液缠住脚踝，石地裂开深渊，她只抓到一缕茧丝，随鞋尖一同坠入黑暗。黑屏终。',
+      first:'',
+      video:'黑屏开始，黑屏结束。\n\n【一句话概述】 幼年阿绣收到姐姐送的蓝色绣花鞋，天真地承诺将来带姐姐过好日子；姐姐却在雾与茧丝中消失。阿绣追进浓雾，看见某种非人的存在吞没姐姐留下的最后轮廓，终于暗示"成仙"并非祝福，而是一场循环的毁灭。\n\n【全局视觉设定】 中式志怪民俗恐怖，古代中式山村晒场，浓雾弥漫，低饱和青绿冷调，极弱幽绿微光，潮湿空气，柔焦梦境质感，轻微胶片颗粒，浅景深，低调光。记忆带轻微拖影、缺帧与水汽晕染，像被反复遗忘又反复浮现的噩梦。幼年阿绣穿旧浅色布衣、双辫，圆眼明亮。姐姐只展示手部、衣袖、模糊侧影与背影，始终不展示清晰正脸。蓝色绣花鞋是姐姐送给阿绣的礼物，小巧、针脚细密、略旧但干净。\n\n【时间轴剧本】\n0-1.5 秒｜黑屏：记忆浮现。画面完全黑暗，不出现文字或人影。音效：浓雾中的远风、一声极远的木铃、若有若无的茧丝摩擦声。黑暗里慢慢浮起一层低饱和青绿色雾气，像记忆从水底上浮。\n\n1.5-6 秒｜姐姐送来绣花鞋。第一视角。幼年阿绣低头，看见姐姐蹲在自己面前，将一双小巧的蓝色绣花鞋轻轻放进她怀里。镜头停留于姐姐温柔的手、旧衣袖、绣花鞋细密的针脚，以及阿绣抱紧鞋子的手指。姐姐的脸被逆光和雾遮住，始终看不清。台词：幼年阿绣，认真又欣喜："姐姐，等我被选上了，我带你去过好日子。" 音效：极轻的衣料摩擦、远处风吹茧丝的沙沙声。情绪：温暖、珍贵，却已经隐约带着不祥的静默。\n\n6-11.5 秒｜姐姐走入雾中。第三视角，中远景。幼年阿绣穿着姐姐送的蓝色绣花鞋，在湿润石地上追赶前方的姐姐。姐姐背对阿绣，一步步走进浓雾；垂落的白色茧丝在前景轻晃，逐渐切断她的衣角、手臂与背影。阿绣伸手追赶，却始终无法触碰。台词：阿绣的声音从困惑逐渐变得急切："姐姐，你要成仙了吗？姐姐……姐姐——你去哪里了？" 音效：绣花鞋踩过湿石板的轻响，风声逐渐变重，远处虫鸣断续出现。\n\n11.5-14.5 秒｜雾中怪物·黏液袭来。第一视角。姐姐的背影彻底停在浓雾深处，垂落的白色茧丝缓慢向内收紧。雾后浮现巨大、模糊、非人的暗影，只看见湿润反光的局部轮廓、掠过画面边缘的细长肢节，以及地面黏湿的虫类碎片；始终不展示完整怪物。突然，一束半透明、带着幽绿冷光的黏液从雾中贴着石地快速滑来，缠住幼年阿绣脚踝。镜头猛地降低，阿绣穿着姐姐送的蓝色绣花鞋在湿石板上后退、打滑，手指惊慌地抓住地面；黏液拖过石板，留下湿亮的痕迹。不要出现血迹、伤口或肢体撕裂。音效：黏液拖行的湿润摩擦声、低沉虫鸣、阿绣压抑而急促的喘息、远处木铃被风吹得失真。\n\n14.5-16 秒｜坠入深渊·记忆断裂。第三视角，雾中的石地在阿绣脚下裂开成一片没有底的漆黑深渊，边缘被湿丝和浓雾吞没。黏液猛地向后收紧，幼年阿绣失去支撑，身体被拖向深渊；她伸手朝姐姐消失的方向抓去，却只抓到一缕被风吹散的白色茧丝。镜头停留在她脚上的蓝色绣花鞋：鞋尖擦过深渊边缘，随她一同坠入黑暗。雾气迅速涌向镜头，完全遮住画面，自然沉入全黑。音效：一声被拉长的湿丝断裂声，随后所有虫鸣、风声与脚步声同时消失，只剩一声极远的木铃，最后彻底死寂。情绪：明确暗示姐姐并未"成仙"，阿绣也正被同一种非人的力量拖向无法返回的毁灭。\n\n【禁止项】 禁止字幕、文字、水印、BGM、现代元素。',
+      params:['幼年阿绣','姐姐','蓝色绣花鞋'] },
+    { no:'shot6', dur:'0:30',
+      text:'人形茧壳内传来极轻起伏，湿丝无声裂开，蛾影掠过、鳞粉如细雪飘落；村民仰头跪下，雾后留下颈肩覆鳞、背垂湿翼的背影；一枚空蚕茧滚到蓝色绣鞋旁，鳞粉缓缓覆上，画面淡入全黑。',
+      first:'',
+      video:'0-8s 夜雾中的人形茧壳几乎静止地悬着。过了片刻，茧体内部传来极轻、极慢的起伏，像某种呼吸，又像错觉。湿丝缝隙间偶尔漏出一线暗金色微光，随即熄灭。举着蓝色蜡烛的村民没有立刻抬头，直到最后一声低沉的心跳从地下传来，众人才缓慢地望向茧壳。（音效：低频心跳逐渐放慢，最后只剩一声闷响，不使用爆裂音）\n\n8-18s 茧壳表面的湿丝从中央开始松动，裂口没有炸开，只是无声地向两侧缓慢分开。黑暗里先掠过一只模糊的蛾影，随后又有几道影子从雾中穿出，数量无法看清。鳞粉并非倾泻，而是在微弱冷光中零散飘落，像灰尘或远处的细雪。村民仰头跪下，手中的空茧微微颤抖，脸上浮现近乎虔诚的笑。（画面碎片：湿润蛾翼一闪而过、指间落下的微光、被雾遮住的仰望面孔；不出现万蛾冲天和荧蓝染空）\n\n18-24s 雾重新遮住晒场。蛾影逐渐消失，茧壳下只剩一道站立的身影。她背对镜头，双辫仍在夜风中轻晃，颈肩似乎覆盖着细密鳞纹，背后垂着两片尚未完全展开的湿翼。翼膜偶尔轻轻收缩，像仍在呼吸。她没有转身，轮廓与夜色逐渐融为一体。（微恐：不展示正脸，不明确呈现完整异形，只通过鳞纹和湿翼暗示她已经不再是人）\n\n24-28s 一枚空蚕茧从她脚边慢慢滚出，在潮湿石地上转了半圈，停在一只小小的蓝色绣鞋旁。绣鞋没有移动，鞋面上的湿丝在微光中轻轻收缩，像刚刚留下不久。远处的身影始终没有回头。\n\n28-30s 几粒鳞粉从夜雾中缓慢落下，覆在蓝色绣鞋上。画面没有立即切黑，先停留在鞋面片刻；背景中的人影被雾一点点吞没，最后只剩一片模糊的暗色。（音效：一声极远、几乎听不清的铜铃；铃声结束后保留短暂的环境死寂，再淡出全黑）',
+      params:['巨大人形茧壳','阿绣','空蚕茧','蓝色绣鞋'] },
+    { no:'shot7', dur:'0:10',
+      text:'追加素材：浓雾中的湿丝特写（该镜头的提示词未登记，可后续补入）。',
+      first:'',
+      video:'',
+      params:[] }
+  ],
+  elements: {
+    Characters: [
+      { id:'c1', name:'阿绣',     note:'主角 · 三视图设定', src:'assets/el-azxiu.webp' },
+      { id:'c2', name:'姐姐',     note:'面容始终藏在雾后', src:'assets/el-sister.webp' },
+      { id:'c3', name:'幼年阿绣', note:'怀抱蓝色绣花鞋',   src:'assets/el-young-azxiu.webp' }
+    ],
+    Locations: [
+      { id:'l1', name:'山村晒场祭台', note:'主场景 · 起祭与成礼', src:'assets/el-altar.webp' },
+      { id:'l2', name:'阿绣的屋子',   note:'幽绿油灯 · 夜',       src:'assets/el-room.webp' }
+    ],
+    Props: [
+      { id:'p1', name:'干枯蛾翅',   note:'关键道具 · 吞服异变', src:'assets/el-moth-wing.webp' },
+      { id:'p2', name:'蓝色绣花鞋', note:'情感锚点 · 姐姐遗物', src:'assets/el-shoes.webp' },
+      { id:'p3', name:'空蚕茧',     note:'仪式道具',            src:'' }
+    ],
+    Generations: [
+      { id:'g1', name:'最终成片 · 无明春山', note:'2:16 · 五镜成片', src:'assets/无明春山-封面.webp', video:'assets/无明春山.mp4' }
+    ],
+    Uploads: [
+      { id:'u1', name:'剧本 · 四幕志怪短剧', note:'四幕结构 · 120s 分镜',  src:'' },
+      { id:'u2', name:'分镜表 · 蛾仙选祭录', note:'10 镜分镜表 · xlsx',   src:'' }
+    ]
+  },
+  results: [
+    { id:'r1', title:'最终成片 · 2:16', dur:'2:16', src:'assets/无明春山-封面.webp', video:'assets/无明春山.mp4', params:['Seedance 2.5','5 镜头','切黑衔接','无 BGM'] },
+  ]
+};
+
+/* 英→中 显示名：界面显示中文，写入提示词的仍是英文（视频模型按英文解析） */
+const ZH = {
+  /* 类型 / 年代 / 节奏 */
+  'General':'通用','Action':'动作','Epic':'史诗','Drama':'剧情','Comedy':'喜剧','Horror':'恐怖','Noir':'黑色电影',
+  '1960s':'1960 年代','1970s':'1970 年代','1980s':'1980 年代','1990s':'1990 年代','2000s':'2000 年代','2010s':'2010 年代','2020s':'2020 年代',
+  'Single Shot':'一镜到底','Slow Burn':'慢燃','Steady':'平稳','Dynamic':'动态','Fast Cut':'快切','Chaotic':'凌乱',
+  /* 摄影机 */
+  '35mm Film':'35mm 胶片','8mm Film':'8mm 胶片','DV Camcorder':'DV 摄像机','Digital Cinema':'数字电影机',
+  'Clean Prime':'纯净定焦','Anamorphic':'变形镜头','Vintage':'复古镜头','Wide Angle':'广角','Macro':'微距','Tilt-Shift':'移轴',
+  'Static':'固定','Dolly In':'推进','Dolly Out':'拉远','Pan Left':'左摇','Pan Right':'右摇','Orbit 360':'360° 环绕',
+  'Crane Up':'摇臂上升','Crane Down':'摇臂下降','Handheld':'手持','POV':'主观视角','Robot Arm':'机械臂',
+  'Helicopter Shot':'直升机航拍','Snorricam':'胸挂斯坦尼康','FPV Drone':'FPV 穿越机','Dutch Angle':'荷兰角','Tracking':'跟踪移镜',
+  /* 灯光 / 调色 */
+  'Low Key':'低调光','High Key':'高调光','Golden Hour':'黄金时刻','Neon':'霓虹','Moonlight':'月光','Studio Soft':'影棚柔光','Custom':'自定义',
+  'Custom Light':'自定义灯光',
+  'Teal & Orange':'青橙','Noir B&W':'黑白','Neon Night':'霓虹夜','Cold Blue':'冷蓝','Bleach Bypass':'跳漂白',
+  'Emerald':'翡翠','Sepia 70s':'70 年代棕调','Crimson':'猩红','Cyber Lime':'赛博青柠','Desert Dust':'荒漠沙',
+  /* 模式 */
+  'References':'参考生成','Forward Extend':'向前延长','Backward Extend':'向后延长','Edit Video':'局部编辑',
+  /* 资产分组 */
+  'Characters':'角色','Locations':'场景','Props':'道具','Generations':'已生成','Uploads':'上传'
+};
+const zh = v => ZH[v] || v;
+const jz = arr => arr.filter(Boolean).map(zh).join(' · ');
+
+/* =========================================================================
+ * 2. 工具函数
+ * ========================================================================= */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hash = s => { let h=0; for(let i=0;i<String(s).length;i++) h=(h*31+String(s).charCodeAt(i))|0; return Math.abs(h); };
+function ph(label, w=400, h=225){
+  const H = hash(label) % 360;
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='"+w+"' height='"+h+"'>"
+    + "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>"
+    + "<stop offset='0' stop-color='hsl("+H+",42%,30%)'/>"
+    + "<stop offset='1' stop-color='hsl("+((H+48)%360)+",52%,15%)'/></linearGradient></defs>"
+    + "<rect width='"+w+"' height='"+h+"' fill='url(#g)'/>"
+    + "<text x='"+w/2+"' y='"+(h/2+5)+"' font-family='sans-serif' font-size='14' fill='rgba(255,255,255,.6)' "
+    + "text-anchor='middle'>"+esc(label)+"</text></svg>";
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+function phFallback(el){
+  if (el.dataset.fb) return; el.dataset.fb = '1';
+  el.src = ph(el.dataset.ph || 'Asset');
+}
+const srcOf = (src, label) => src || ph(label);
+/* video 加载失败时退化为 poster / 占位图 */
+function vidFallback(v){
+  const img = document.createElement('img');
+  img.dataset.ph = v.dataset.ph || 'Clip';
+  img.src = v.dataset.poster || '';
+  img.onerror = function(){ phFallback(img); };
+  if (!img.src) phFallback(img);
+  v.replaceWith(img);
+}
+let toastTimer;
+function toast(msg, isErr){
+  const t = $('#toast'); t.textContent = msg;
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ t.className='toast'; }, 2200);
+}
+
+/* =========================================================================
+ * 3. 状态
+ * ========================================================================= */
+const state = {
+  view: 'brief',
+  folder: 'all',   /* 当前文件夹：all / shot1..shot5 / assets / final */
+  file: null       /* 当前打开的素材 id（详情页） */
+};
+
+/* =========================================================================
+ * 4. 视图 A：项目 Brief
+ * ========================================================================= */
+function renderBrief(){
+  const P = PROJECT, s = P.stats;
+  $('#crumbName').textContent = P.name;
+  const wall = key => (P.elements[key] || []).map(e =>
+    '<div class="wcard"><div class="th"><img src="'+esc(srcOf(e.src, e.name))+'" data-ph="'+esc(e.name)+'" '
+    + 'onerror="phFallback(this)" alt=""></div>'
+    + '<div class="nm"><b>'+esc(e.name)+'</b><i>'+esc(e.note || key)+'</i></div></div>').join('');
+
+  $('#briefBody').innerHTML = `
+  <div class="hero">
+    <div class="cover">
+      <img src="${esc(P.cover)}" data-ph="${esc(P.name)}" onerror="phFallback(this)" alt="">
+      <div class="fade"></div><div class="tag">${esc(P.model)}</div>
+    </div>
+    <div class="body">
+      <h1>${esc(P.name)}</h1>
+      <div class="sub">${esc(P.subtitle)}</div>
+      <div class="desc">${esc(P.desc)}</div>
+      <div class="metarow">
+        <div class="tags">${P.tags.map(t => '<span>'+esc(t)+'</span>').join('')}</div>
+      </div>
+      <div class="stat">
+        <div><b>${s.shots}</b><i>镜头</i></div>
+        <div><b>${s.elements}</b><i>资产</i></div>
+        <div><b>${s.duration}</b><i>时长</i></div>
+        <div><b>${s.models}</b><i>模型</i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>创作过程 <em>How it was made</em></h2>
+    <div class="hint">从剧本到成片的完整链路，每个节点都可以点开查看当时的设置。</div>
+    <div class="tl">
+      ${P.timeline.map(t => '<div class="item '+t.s+'"><div class="t">'+esc(t.t)
+        + (t.s==='now'?'<i>· 进行中</i>':'')+'</div><div class="d">'+esc(t.d)+'</div></div>').join('')}
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>全部提示词 <em>All prompts</em></h2>
+    <div class="hint">共 ${P.prompts.length} 条镜头提示词，点击任意一条展开完整文本与摄影机参数。</div>
+    <div class="plist">
+      ${P.prompts.map(p => `
+        <div class="pitem" data-act="ptoggle">
+          <div class="ph">
+            <span class="no">${esc(p.no)}</span>
+            <span class="pv">${esc(p.text)}</span>
+            <span class="ar">›</span>
+          </div>
+          <div class="pd">
+            ${(p.first || p.video) ? `
+            <div class="plabel">画面描述</div>
+            <pre>${esc(p.text)}</pre>`
+            + (p.first ? `
+            <div class="plabel">首帧 · 图片生成提示词（GPT 2.0）</div>
+            <pre>${esc(p.first)}</pre>` : '')
+            + (p.video ? `
+            <div class="plabel">视频 · 生成提示词（Seedance 2.5）</div>
+            <pre>${esc(p.video)}</pre>` : '')
+            : `<pre>${esc(p.text + '\n\n' + p.params.join('; ') + '.')}</pre>`}
+            <div class="chips">
+              ${p.params.map(x => '<span class="chip" title="'+esc(x)+'">'+esc(zh(x))+'</span>').join('')}
+              ${p.dur ? '<span class="chip">时长 '+esc(p.dur)+'</span>' : ''}
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>资产 <em>Elements</em></h2>
+    <div class="hint">角色、地点与道具只需创建一次，即可跨镜头、跨项目复用。</div>
+    ${['Characters','Locations','Props','Generations'].map(k =>
+      '<div class="wgroup"><h3>'+esc(zh(k))+'</h3><div class="wall">'+wall(k)+'</div></div>').join('')}
+  </div>`;
+}
+
+/* =========================================================================
+ * 6. 文件树：以 shot 为单位 + 主体 assets 文件夹 + 成片输出
+ * ========================================================================= */
+/* [编辑区 5] 成片视频路径
+ * 当前 assets/无明春山.mp4 = 720p 压缩版（9 MB），随包分发，双击即可播放。
+ * 原始 1080p60 高清版（239 MB）保留在本地源素材目录，未随包分发；
+ * 要换回高清，把那一份复制到 assets/ 覆盖同名文件即可，无需改代码。 */
+const MP4 = 'assets/无明春山.mp4';
+const DAY = '2026.10.22';
+
+/* [编辑区 2] assets 文件夹：7 张主体图 + 各自提示词（原文取自《项目展示网页.docx》）
+ * 每项字段：id / name / src 图片路径 / prompt 提示词 / refs 需在提示词里高亮的主体名 */
+const SUBJECTS = [
+  { id:'a-azxiu', name:'阿绣', src:'assets/el-azxiu.webp',
+    prompt:'无 HUD，无字幕水印。国风写实风格，古代中式山村少女，双辫，圆眼，面容清秀而带压抑克制感，穿旧式浅色布衣长裙，脚穿一双小小的蓝色绣花鞋，颈肩可见若隐若现的细密鳞纹，整体低饱和青绿色，潮湿多雾气息，幽绿烛火与暗金微光点缀，影像写实，轻微胶片颗粒，中等锐度，低调光，浅灰到白色柔和渐变背景，主体完整清晰，无遮挡，单人',
+    refs:['阿绣','蓝色绣花鞋'] },
+  { id:'a-sister', name:'姐姐', src:'assets/el-sister.webp',
+    prompt:'无 HUD，无字幕水印。国风写实风格，古代中式山村年轻女子，旧衣袖口朴素陈旧，手势温柔克制，身影纤细，侧影被浓雾半遮，面容始终模糊不可辨认，整体低饱和青绿色，潮湿多雾，冷湿空气中带少量幽绿与暗金微光，影像写实，轻微胶片颗粒，中等锐度，低调光，浅灰到白色柔和渐变背景，主体完整清晰，无遮挡，单人',
+    refs:['姐姐'] },
+  { id:'a-young', name:'幼年阿绣', src:'assets/el-young-azxiu.webp',
+    prompt:'无 HUD，无字幕水印。国风写实风格，古代中式山村幼年女孩，穿旧浅色布衣，身形瘦小，神情稚嫩又依恋，怀中抱着一双小小的蓝色绣花鞋，发式朴素，整体低饱和青绿色，潮湿雾气笼罩，幽微冷光与少量暗金微光，影像写实，轻微胶片颗粒，中等锐度，低调光，浅灰到白色柔和渐变背景，主体完整清晰，无遮挡，单人',
+    refs:['幼年阿绣','蓝色绣花鞋'] },
+  { id:'a-altar', name:'山村晒场祭台', src:'assets/el-altar.webp',
+    prompt:'无 HUD，无字幕水印。国风写实风格，古代中式山村晒场祭台，木架上垂挂成串白色蚕茧，石板地面潮湿反光，远处铜铃隐在浓雾中，整体低饱和青绿色，幽绿烛火与暗金微光点缀，影像写实，轻微胶片颗粒，低调光，氛围安静压抑克制，无人物',
+    refs:['山村晒场祭台','空蚕茧'] },
+  { id:'a-room', name:'阿绣的屋子', src:'assets/el-room.webp',
+    prompt:'无 HUD，无字幕水印。国风写实风格，古代中式山村少女居住的狭小旧屋，木墙陈旧潮湿，床榻简陋，室内陈设极少，油灯发出幽绿微光，空气湿冷，门外夜雾渗入屋内，整体低饱和青绿色，局部暗金反光极弱，影像写实，轻微胶片颗粒，中等锐度，低调光，氛围安静压抑克制，无人物',
+    refs:['阿绣的屋子'] },
+  { id:'a-wing', name:'干枯蛾翅', src:'assets/el-moth-wing.webp',
+    prompt:'无 HUD，无字幕水印。国风写实风格，一片干枯的蛾翅，边缘残破卷曲，表面布满细小纹路与微弱鳞粉，质地薄脆陈旧，呈灰白与暗褐交杂色泽，带潮湿阴冷气息，整体低饱和青绿色氛围，局部映出极弱幽绿与暗金反光，影像写实，轻微胶片颗粒，中等锐度，低调光，浅灰到白色柔和渐变背景，单物件居中，无人物无手部无场景干扰',
+    refs:['干枯蛾翅'] },
+  { id:'a-shoes', name:'蓝色绣花鞋', src:'assets/el-shoes.webp',
+    prompt:'无 HUD，无字幕水印。国风写实风格，一双小小的蓝色绣花鞋，旧布面略有磨损与湿气，鞋面绣纹细致但陈旧，颜色沉静发暗，带古代乡村手工布鞋质感，是被珍藏多年的重要旧物，整体低饱和青绿色氛围中保留蓝色主体，局部有极弱暗金微光，影像写实，轻微胶片颗粒，中等锐度，低调光，浅灰到白色柔和渐变背景，单物件居中，无人物无手部无桌面陈设',
+    refs:['蓝色绣花鞋'] },
+  { id:'a-moth', name:'蛾仙 · 四视图变体', src:'assets/蛾仙变体.webp',
+    prompt:'主体形象变体方案：蛾仙形态四视图设定图，干尸状蛾人、双翼贴体（提示词待补）。',
+    refs:[] }
+];
+
+/* ── [编辑区 3] 各 shot 的素材清单 ────────────────────────────────────
+ * 一行一个文件：name 卡片名 / video 视频路径 / src 海报或图片 / dur 时长
+ * prompt 不写 = 名字含「定稿」的文件自动挂 [编辑区 1] 里该 shot 的 video 提示词，
+ * 其余显示「未登记」；也可写 prompt:'...' 覆盖。加素材 = 加一行。
+ * 文件都放 assets/，海报帧放 assets/posters/（抽帧生成，删了也不影响播放）。
+ * ──────────────────────────────────────────────────────────────────── */
+/* shot1 的两段专属提示词：非定稿（8 版共用）与 定稿2（参考生视频） */
+const SP1 = {
+  draft: '国风写实，电影宽幅2.39:1，中式志怪民俗恐怖气质，低饱和青绿主调，潮湿冷雾、幽绿烛火、轻微胶片颗粒与湿冷空气共同塑造诡美而不安的祭祀压迫感。无BGM。\n\n古代山村祭场，夜，浓雾弥漫，风穿过悬垂茧串，远处偶有木铃单响，地面潮湿，烛火幽绿。\n\n镜头1 [3.0s] 时间：夜。[大远景/固定镜头] 高机位俯拍雾锁山村祭场·夜，前景是一排排垂落的白色茧串，中景是冷雾笼罩的祭场与木构屋舍，背景山体隐在夜色里，空蚕茧零散悬垂或被供奉其间，风吹过时茧串轻晃，幽绿烛火在雾里若隐若现。\n\n镜头2 [3.0s] 时间：夜。[全景/缓慢推近] 镜头向雾锁山村祭场·夜中的祭台前推进，成列村民跪伏在湿冷地面，随着推进他们整齐抬头望向同一方向，脸色木然，烛火把下颌与眼窝切出幽暗阴影，整个空间像在等待某个被选中的人出现。\n注意：村民是群像，脸部不要长得一样',
+  final2: '参考主体形象阿绣；参考图2 场景；参考道具：图1\n注意不要参考原图构图，切换分镜构图，改为侧面特写。\n她仰头将蛾翅送入口中闭眼吞咽，喉结轻动，再睁眼时瞳孔里烛火微弱的跳了一下'
+};
+
+const SHOT_FILES = {
+  shot1: [
+    { name:'定稿 · 晒场黎明',   video:'assets/shot1-定稿.mp4',  src:'assets/posters/shot1-定稿.webp',  dur:'0:20' },
+    { name:'定稿2 · 吞翅特写',  video:'assets/shot1-定稿2.mp4', src:'assets/posters/shot1-定稿2.webp', dur:'0:06', prompt:SP1.final2 },
+    { name:'非定稿 01',       video:'assets/shot1-1.mp4',    src:'assets/posters/shot1-1.webp',    dur:'0:06', prompt:SP1.draft },
+    { name:'非定稿 02',       video:'assets/shot1-2.mp4',    src:'assets/posters/shot1-2.webp',    dur:'0:10', prompt:SP1.draft },
+    { name:'非定稿 03',       video:'assets/shot1-3.mp4',    src:'assets/posters/shot1-3.webp',    dur:'0:06', prompt:SP1.draft },
+    { name:'非定稿 04',       video:'assets/shot1-4.mp4',    src:'assets/posters/shot1-4.webp',    dur:'0:08', prompt:SP1.draft },
+    { name:'非定稿 05',       video:'assets/shot1-5.mp4',    src:'assets/posters/shot1-5.webp',    dur:'0:08', prompt:SP1.draft },
+    { name:'非定稿 06',       video:'assets/shot1-6.mp4',    src:'assets/posters/shot1-6.webp',    dur:'0:08', prompt:SP1.draft },
+    { name:'非定稿 07',       video:'assets/shot1-7.mp4',    src:'assets/posters/shot1-7.webp',    dur:'0:08', prompt:SP1.draft },
+    { name:'非定稿 08',       video:'assets/shot1-8.mp4',    src:'assets/posters/shot1-8.webp',    dur:'0:07', prompt:SP1.draft }
+  ],
+  shot2: [
+    { name:'定稿 · 鳞纹与抽丝', video:'assets/shot2定稿.mp4',  src:'assets/posters/shot2定稿.webp',  dur:'0:30' },
+    { name:'非定稿 01',       video:'assets/shot2-1.mp4',   src:'assets/posters/shot2-1.webp',   dur:'0:08' },
+    { name:'非定稿 02',       video:'assets/shot2-2.mp4',   src:'assets/posters/shot2-2.webp',   dur:'0:10' },
+    { name:'非定稿 03',       video:'assets/shot2-3.mp4',   src:'assets/posters/shot2-3.webp',   dur:'0:04' }
+  ],
+  shot3: [
+    { name:'定稿 · 走进人茧',   video:'assets/shot3-定稿.mp4',  src:'assets/posters/shot3-定稿.webp',  dur:'0:30' },
+    { name:'非定稿 01',       video:'assets/shot3-1.mp4',   src:'assets/posters/shot3-1.webp',   dur:'0:10' },
+    { name:'非定稿 02',       video:'assets/shot3-2.mp4',   src:'assets/posters/shot3-2.webp',   dur:'0:12' }
+  ],
+  shot4: [
+    { name:'定稿 · 湿丝封茧',   video:'assets/shot4-定稿.mp4',  src:'assets/posters/shot4-定稿.webp',  dur:'0:04' },
+    { name:'首帧分镜图',       src:'assets/shot4首帧图.webp', aspect:'16:9', size:'3838×2158' }
+  ],
+  shot5: [
+    { name:'定稿 · 蓝鞋记忆',   video:'assets/shot5-定稿.mp4',  src:'assets/posters/shot5-定稿.webp',  dur:'0:18' },
+    { name:'定稿2 · 蓝鞋记忆',  video:'assets/shot5定稿-2.mp4', src:'assets/posters/shot5定稿-2.webp', dur:'0:20' }
+  ],
+  shot6: [
+    { name:'定稿 · 蛾影新生',   video:'assets/shot6-定稿.mp4',  src:'assets/posters/shot6-定稿.webp',  dur:'0:30' },
+    { name:'非定稿 01',       video:'assets/shot6-1.mp4',   src:'assets/posters/shot6-1.webp',   dur:'0:10' },
+    { name:'非定稿 02',       video:'assets/shot6-2.mp4',   src:'assets/posters/shot6-2.webp',   dur:'0:10' }
+  ],
+  shot7: [
+    { name:'定稿 · 雾中湿丝',   video:'assets/shot7定稿.mp4',  src:'assets/posters/shot7定稿.webp',  dur:'0:10' }
+  ]
+};
+
+const FILES = [];
+SUBJECTS.forEach(f => FILES.push({ ...f, folder:'assets', type:'img', model:'GPT 2.0',
+  aspect:'16:9', size:'2048×1152', created:DAY }));
+
+/* 每个 shot 的素材卡片：清单取自 SHOT_FILES；
+ * 名字含「定稿」且未写 prompt 的文件，自动挂 [编辑区 1] 中该 shot 的 video 提示词 */
+const promptOf = no => (PROJECT.prompts.find(p => p.no === no) || {}).video || '';
+Object.keys(SHOT_FILES).forEach(no => {
+  const meta = PROJECT.prompts.find(p => p.no === no) || {};
+  SHOT_FILES[no].forEach((f, i) => {
+    const auto = f.prompt !== undefined ? f.prompt : (/定稿/.test(f.name) ? promptOf(no) : '');
+    FILES.push({ id:no+'-f'+i, folder:no, name:no+' · '+f.name,
+      type:f.video ? 'video' : 'img', src:f.src || '', video:f.video,
+      dur:f.dur || '', prompt:auto,
+      model:f.video ? 'Seedance 2.5' : 'GPT 2.0',
+      aspect:f.aspect || (f.video ? '16:9' : '2.39:1'),
+      size:f.size || (f.video ? '1280×720' : '—'),
+      refs:meta.params || [], created:DAY });
+  });
+});
+
+/* 成片输出（真实文件） */
+FILES.push({ id:'final', folder:'final', name:'无明春山 · 成片', type:'video',
+  src:'assets/无明春山-封面.webp', video:MP4, dur:'2:16',
+  prompt:'游戏衍生剧情片《无明春山》。五镜按「切黑 + 音效延续」衔接：阿绣被村民选为祭品吞下蛾翅（shot1）→ 颈侧鳞纹浮现、腕间抽丝（shot2）→ 走入祭台人形蚕茧（shot3）→ 浓雾记忆里姐姐留下的蓝色绣花鞋（shot4）→ 茧壳开裂蛾影掠过，颈肩覆鳞的背影与滚落的空蚕茧（shot5）。',
+  model:'Seedance 2.5', aspect:'2.39:1', size:'1920×804',
+  refs:['阿绣','蓝色绣花鞋','巨大人形蚕茧'], created:DAY });
+
+/* [编辑区 4] 左侧文件树：改 name 换显示名，增删一行即增删文件夹
+ * id 必须与 SHOT_ASSETS / PROJECT.prompts 的 shot 编号对应；计数自动统计，不用手填 */
+const TREE = [
+  { id:'all',    name:'All assets · 全部', icon:'✦' },
+  { id:'shot1',  name:'shot1 · 祭台选祭' },
+  { id:'shot2',  name:'shot2 · 鳞纹初现' },
+  { id:'shot3',  name:'shot3 · 走进人茧' },
+  { id:'shot4',  name:'shot4 · 湿丝封茧' },
+  { id:'shot5',  name:'shot5 · 蓝鞋记忆' },
+  { id:'shot6',  name:'shot6 · 蛾影新生' },
+  { id:'shot7',  name:'shot7 · 追加素材' },
+  { id:'assets', name:'assets · 主体图' },
+  { id:'final',  name:'成片输出' }
+];
+const filesIn = fid => fid === 'all' ? FILES : FILES.filter(f => f.folder === fid);
+const findFile = id => FILES.find(f => f.id === id);
+
+function renderTree(){
+  $('#tree').innerHTML =
+    '<div class="tproj"><div class="tav"><img src="'+esc(PROJECT.cover)+'" onerror="phFallback(this)" alt=""></div>'
+    + '<div class="tn"><b>'+esc(PROJECT.name)+'</b><i>'+esc(PROJECT.subtitle)+'</i></div></div>'
+    + '<div class="titem" data-act="tree" data-id="brief"><span class="ico">📄</span><span class="tl">Project brief</span></div>'
+    + '<div class="thd">Folders</div>'
+    + TREE.map(t =>
+        '<div class="titem'+(state.folder===t.id?' on':'')+'" data-act="tree" data-id="'+t.id+'">'
+        + '<span class="ico">'+(t.icon || '📁')+'</span><span class="tl">'+esc(t.name)+'</span>'
+        + '<span class="tc">'+filesIn(t.id).length+'</span></div>').join('')
+    + '<div class="tfoot">Xumi Story. · 演示数据<br>shot 资产待补齐，补入 assets/ 后自动展示</div>';
+}
+
+function renderFiles(){
+  const list = filesIn(state.folder);
+  const meta = TREE.find(t => t.id === state.folder) || { name:'全部资产' };
+  $('#farea').innerHTML =
+    '<div class="fhead"><b>'+esc(meta.name)+'</b><span>'+list.length+' 个文件</span><span class="sp"></span>'
+    + '<span>点击文件查看详情</span></div>'
+    + (list.length
+      ? '<div class="fgrid">' + list.map(f =>
+          '<div class="fcard" data-act="file" data-id="'+f.id+'">'
+          + '<div class="th"><img src="'+esc(srcOf(f.src, f.name))+'" data-ph="'+esc(f.name)+'" onerror="phFallback(this)" alt="">'
+          + (f.type === 'video' ? '<span class="vtag">▶ ' + esc(f.dur || 'video') + '</span>' : '')
+          + '</div><div class="nm">'+esc(f.name)+'</div>'
+          + '<div class="md">'+esc(f.model)+' · '+esc(f.aspect || '—')+'</div></div>').join('') + '</div>'
+      : '<div class="fempty">此文件夹为空 —— shot 资产待补齐</div>');
+}
+
+/* =========================================================================
+ * 7. 素材详情页：大图预览 + PROMPT（@主体高亮）+ DETAILS + Download
+ * ========================================================================= */
+const hl = (text, refs) => {
+  let s = esc(text);
+  (refs || []).forEach(r => { if (r) s = s.split(esc(r)).join('<span class="hl">@' + esc(r) + '</span>'); });
+  return s;
+};
+const drow = (k, v) => '<div class="row"><span class="k">'+k+'</span><span class="v">'+esc(v || '—')+'</span></div>';
+
+function renderDetail(){
+  const f = findFile(state.file);
+  if (!f) return renderFiles();
+  const hasVideo = f.type === 'video' && f.video;
+  $('#farea').innerHTML =
+    '<div class="detail">'
+    + '<div class="dmedia">'
+    +   '<div class="dback" data-act="file-close">← 返回文件列表</div>'
+    +   (hasVideo
+        ? '<video id="dvid" src="'+esc(f.video)+'" poster="'+esc(srcOf(f.src, f.name))+'" autoplay muted loop playsinline></video>'
+        : '<img src="'+esc(srcOf(f.src, f.name))+'" data-ph="'+esc(f.name)+'" onerror="phFallback(this)" alt="">'
+          + (f.type === 'video' ? '<div class="novid">片段待生成（占位）</div>' : ''))
+    +   '<div class="dbar">'
+    +     (hasVideo
+          ? '<span id="tcur">0:00</span><div class="track" id="dtrack"><i id="dfill"></i></div>'
+          : '<span class="sp"></span>')
+    +     '<span>'+esc(f.dur || f.aspect || '')+'</span></div>'
+    + '</div>'
+    + '<div class="dinfo">'
+    +   '<div class="duser"><div class="dav">X</div><div class="dn"><b>xumi</b><i>Author</i></div>'
+    +     '<span class="sp"></span><span class="dx" data-act="file-close">×</span></div>'
+    +   '<div class="dsec"><span>PROMPT</span><button class="cpy" data-act="copy">Copy</button></div>'
+    +   '<div class="dprompt" id="dprompt">'+hl(f.prompt || '该版本的提示词未登记。', f.refs)+'</div>'
+    +   '<div class="dsee" data-act="see-all">See all ↓</div>'
+    +   '<div class="dsec" style="margin-top:12px"><span>DETAILS</span></div>'
+    +   '<div class="dtable">'+drow('Model', f.model)+drow('Aspect', f.aspect)+drow('Duration', f.dur)
+    +     drow('Size', f.size)+drow('Created', f.created)+'</div>'
+    +   '<span style="flex:1"></span>'
+    +   '<button class="dl" data-act="download">⬇&ensp;Download</button>'
+    + '</div></div>';
+  const v = $('#dvid');
+  if (v){
+    const fill = $('#dfill'), tcur = $('#tcur'), track = $('#dtrack');
+    const fmt = t => { t = Math.max(0, t | 0); return Math.floor(t/60) + ':' + String(t%60).padStart(2,'0'); };
+    v.addEventListener('timeupdate', () => {
+      if (v.duration){ fill.style.width = (v.currentTime / v.duration * 100) + '%'; tcur.textContent = fmt(v.currentTime); }
+    });
+    track.addEventListener('click', e => {
+      if (!v.duration) return;
+      const r = track.getBoundingClientRect();
+      v.currentTime = (e.clientX - r.left) / r.width * v.duration;
+    });
+  }
+}
+
+function openFile(id){ state.file = id; renderDetail(); }
+function closeFile(){ state.file = null; renderFiles(); }
+function copyPrompt(){
+  const f = findFile(state.file); if (!f) return;
+  const done = () => toast('提示词已复制到剪贴板');
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(f.prompt).then(done, () => toast('复制失败', true));
+  } else {
+    const ta = document.createElement('textarea'); ta.value = f.prompt; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove(); done();
+  }
+}
+function downloadFile(){
+  const f = findFile(state.file); if (!f) return;
+  const url = f.video || (f.src && !f.src.startsWith('data:') ? f.src : '');
+  if (!url){ toast('演示占位：该文件待补齐后可下载', true); return; }
+  const a = document.createElement('a');
+  a.href = url; a.download = f.name.replace(/[\\/:*?"<>|]/g, '_'); a.click();
+  toast('开始下载：' + f.name);
+}
+
+/* （原中栏预览 / 结果网格 / Generate 逻辑已按新文件树逻辑移除） */
+
+/* =========================================================================
+ * 8. 视图切换与事件
+ * ========================================================================= */
+function goto(v){
+  state.view = v;
+  $('#briefView').classList.toggle('hidden', v !== 'brief');
+  $('#studioView').classList.toggle('hidden', v !== 'studio');
+  if (v === 'studio') renderAll();
+}
+function renderAll(){
+  $('#topName').textContent = PROJECT.name;
+  renderTree();
+  state.file ? renderDetail() : renderFiles();
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t) return;
+  const act = t.dataset.act;
+
+  if (act === 'goto-studio'){ goto('studio'); return; }
+  if (act === 'goto-brief'){ goto('brief'); return; }
+  if (act === 'ptoggle'){ t.classList.toggle('open'); return; }
+
+  if (act === 'tree'){
+    if (t.dataset.id === 'brief'){ goto('brief'); return; }
+    state.folder = t.dataset.id;
+    renderTree(); renderFiles();
+    return;
+  }
+  if (act === 'file'){ openFile(t.dataset.id); return; }
+  if (act === 'file-close'){ closeFile(); return; }
+  if (act === 'copy'){ copyPrompt(); return; }
+  if (act === 'see-all'){
+    const p = $('#dprompt');
+    if (p){ p.classList.toggle('open'); t.textContent = p.classList.contains('open') ? 'See all ↑' : 'See all ↓'; }
+    return;
+  }
+  if (act === 'download'){ downloadFile(); return; }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (state.view === 'studio' && state.file) closeFile();
+  else if (state.view === 'studio') goto('brief');
+});
+
+/* 启动 */
+renderBrief();
+goto('brief');
+</script>
+</body>
+</html>
