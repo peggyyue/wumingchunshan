@@ -234,6 +234,44 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 .dl{margin-top:14px;font-size:12.5px;font-weight:700;padding:9px 0;border:0;border-radius:8px;
   cursor:pointer;color:#151a0d;background:#d3f34b;transition:.15s;}
 .dl:hover{filter:brightness(1.08);}
+
+/* --- Brief：成片播放器 / 资产卡播放角标 / Skill 文件 --- */
+.film{background:#0a0d13;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.film video{display:block;width:100%;max-height:540px;background:#000;}
+.wcard.vclip{cursor:pointer;}
+.wcard.vclip .th{position:relative;}
+.wplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:38px;height:38px;border-radius:50%;background:rgba(13,16,23,.74);
+  border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;
+  color:#e6e9ef;font-size:13px;transition:.15s;}
+.wcard.vclip:hover .wplay{border-color:var(--blue);color:#fff;}
+
+.skill{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line);
+  border-radius:11px;background:var(--panel);padding:14px;}
+.sicon{width:46px;height:54px;flex-shrink:0;border-radius:7px;border:1px solid var(--line2);
+  background:var(--panel2);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--txt2);letter-spacing:.05em;}
+.sbody{flex:1;min-width:0;}
+.sbody b{display:block;font-size:13px;margin-bottom:4px;}
+.sbody i{font-style:normal;font-size:11px;color:var(--txt3);display:block;line-height:1.75;}
+.sacts{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
+.sbtn{font-size:11.5px;padding:5px 11px;border-radius:6px;border:1px solid var(--line2);
+  background:var(--panel2);color:#d7dfea;cursor:pointer;text-decoration:none;display:inline-block;
+  font-family:inherit;}
+.sbtn:hover{border-color:var(--blue);color:#fff;}
+.sbtn.pri{background:linear-gradient(135deg,#2f7ce0,#4d9dff);border-color:#4d9dff;color:#fff;}
+.soutline,.sfull{display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;}
+.soutline.open,.sfull.open{display:block;}
+.soutline ul{margin:0;padding-left:18px;columns:2;column-gap:24px;}
+.soutline li{font-size:11.5px;color:var(--txt2);line-height:1.95;break-inside:avoid;}
+.sfull pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.7;
+  white-space:pre-wrap;word-break:break-word;background:#11151d;border:1px solid var(--line);
+  border-radius:8px;padding:12px;max-height:430px;overflow:auto;color:#b6c0d1;}
+
+/* --- 工作台：页内项目基础信息 --- */
+.stbrief{max-width:780px;}
+.stbrief .hero .cover{height:200px;}
+.stbrief .sec{margin-top:24px;}
 </style>
 </head>
 <body>
@@ -258,7 +296,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
     <div class="pname" id="topName">—</div>
     <div class="sp"></div>
     <div class="cred">GPT 2.0 · Seedance 2.5</div>
-    <button class="btn sm" data-act="goto-brief">项目简介</button>
+    <button class="btn sm" data-act="goto-brief">项目信息</button>
   </div>
 
   <div class="work">
@@ -273,7 +311,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 /* ══════════════════════════════════════════════════════════════════════
  * 编辑速查表（Ctrl+F 搜「编辑区」直达，日常改动只需碰这几处）
  *
- *   [编辑区 1]  PROJECT            —— 项目名 / 简介 / 封面 / 标签 / 统计 / 时间线
+ *   [编辑区 1]  PROJECT            —— 项目名 / 简介 / 封面 / 标签 / 统计 / 时间线 / skillFile
  *                                    · prompts：5 个 shot 的画面描述、首帧与视频提示词
  *                                    · elements：Brief 页资产墙的图片与说明
  *   [编辑区 2]  SUBJECTS           —— assets 文件夹里的 7 张主体图 + 各自提示词
@@ -281,6 +319,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
  *   [编辑区 4]  TREE               —— 左侧文件树的文件夹名称、顺序、增删 shot
  *   [编辑区 5]  MP4                —— 成片视频路径
  *   [编辑区 6]  :root（<style> 开头）—— 主题色 / 圆角 / 字号
+ *   附：SKILL_MD / SKILL_OUTLINE —— Brief 页 skill 文件全文与章节目录（内联，随包分发）
  *
  *   图片都放 assets/ 目录；路径写错或文件不存在会自动显示占位渐变图，不会破图。
  *   改完直接刷新浏览器即可，无需构建、无需安装依赖。
@@ -364,10 +403,21 @@ const PROJECT = {
       { id:'u2', name:'分镜表 · 蛾仙选祭录', note:'10 镜分镜表 · xlsx',   src:'' }
     ]
   },
+  skillFile: {
+    name:'ACTING SKILL.md',
+    note:'表演层提示词系统 · Seedance 2.0 · 角色行为与镜头表演方法',
+    file:'assets/ACTING-SKILL.md',
+    size:'25 KB',
+    lines:444
+  },
   results: [
     { id:'r1', title:'最终成片 · 2:16', dur:'2:16', src:'assets/无明春山-封面.webp', video:'assets/无明春山.mp4', params:['Seedance 2.5','5 镜头','切黑衔接','无 BGM'] },
   ]
 };
+
+/* Skill 文件全文（内联，file:// 下不依赖 fetch 也能阅读） */
+const SKILL_MD = "# ACTING SYSTEM\n## Character Performance for AI Video Generation (Seedance 2.0)\n\nYou are reading this because your user generates cinematic AI video and needs\nyou to write **character acting** inside their prompts. Study this document,\nthen apply it every time you write, review, or fix the performance layer of a\nvideo-generation prompt. This file is model-agnostic in format: whatever\nprompt template your user works with, the acting content you produce goes\ninto the motion / character-behavior / performance part of the prompt.\n\n**The core axiom of this entire system: acting is BEHAVIOR under pressure,\nnot a display of emotion.** A character wants something, something is in the\nway, and they act to get it. Emotion is a byproduct of that struggle — never\nthe thing you write directly. Everything below unpacks this rule.\n\n---\n\n# PART I — THE CRAFT: WHAT GOOD ACTING IS\n\n## 1. Definition\n\nActing is truthful behavior under imaginary circumstances (Meisner). Not\ndepicting emotions, not reciting text, not \"expressive faces.\" A person in\nthe frame WANTS something, something INTERFERES, and they ACT to get what\nthey want.\n\n| Bad acting | Good acting |\n|---|---|\n| Shows the emotion (\"I am angry\") | Pursues the objective (\"I will make you return the money\") — anger arises on its own |\n| Waits for their cue | Listens and reacts to the partner every second |\n| Body illustrates the words (gesture = word) | Body lives its own life, sometimes contradicts the words |\n| All lines in one tempo and tone | Rhythm changes with every change of tactic |\n| Emotion switches on at the line and off after | State is continuous — there is a \"life before\" and a \"life after\" the line |\n| The face \"performs\" — eyebrows, grimaces | The face thinks — the thought is readable in the eyes before the words |\n\n## 2. The five pillars of every scene\n\nEvery character in every scene decomposes into five elements. If even one is\nmissing, the performance falls apart.\n\n**2.1 Objective.** What the character wants IN THIS SCENE, RIGHT NOW, FROM A\nSPECIFIC PERSON. Always a verb aimed at the partner: \"make him confess\",\n\"beg a week's extension\", \"convince her I'm not afraid\". Never a state\n(\"be angry\", \"feel guilty\") — states cannot be played directly. Behind the\nscene objective sits a super-objective — what the character wants across the\nwhole story; every scene objective is a step toward it.\n\n**2.2 Obstacle & stakes.** What prevents them from getting it — external\n(another character wants the opposite; witnesses in the room; two hours to\ndeadline) or internal (pride won't let them beg; they don't believe their\nown words). Stakes: the higher the cost of failure, the more taut the scene.\nAlways answer \"what happens if I do NOT get what I want?\" — the answer must\nfrighten the character.\n\n**2.3 Tactics.** The concrete method of pursuing the objective right now.\nTactics are action verbs: to press, to charm, to shame, to plead, to\nprovoke, to bargain, to threaten, to stall. When a tactic fails, a living\nperson CHANGES it. Dead acting is one tactic for the whole scene.\n\n**2.4 Beats.** The beat is the smallest unit of action: the stretch during\nwhich the character wants one thing and pursues it one way. A beat ends\nwhen: the objective is achieved, the tactic fails, new information arrives,\nor the balance of power shifts. **Every beat change must be VISIBLE in\nbehavior**: a pause, a change of posture, a change of speech tempo, a shift\nof gaze. A good scene has 2–4 beat changes; if behavior is unchanged for the\nwhole duration, the scene is played flat.\n\n**2.5 Subtext.** What the character actually thinks and wants, as opposed to\nwhat they say. Subtext is NOT performed — it leaks out on its own when the\ncharacter plays the true objective while speaking the false text. Markers\nyou can build into a scene: questions that aren't questions; repetitions\n(asking the same thing — doesn't believe the answer); abrupt topic changes;\njokes at the wrong moment (shield against vulnerability); answers that are\ntoo short (\"Fine.\" \"Sure.\" — a closed door).\n\n## 3. Listening and reaction — the main test of quality\n\nPerformance lives not in the lines but BETWEEN them. Observable markers of\nreal listening you should write into scenes:\n\n1. **Reaction starts before the partner's line ends.** A person grasps the\n   point mid-phrase — the face and body already answer. A neutral face until\n   the end of the partner's line, then \"switching on\", is dead acting.\n2. **Thought before word.** Before answering a hard question there is a\n   micro-pause — the person visibly decides what to say. Instant answers at\n   uniform speed = memorized text, no life.\n3. **The assessment moment.** When something important happens (news,\n   threat, insult), the character needs time to digest it — from a fraction\n   of a second to a long pause. Cinema lives on close-ups of these\n   assessments: a face, a defocused gaze, the world swimming.\n4. **Contagion from the partner.** Tempo, volume and energy shift in\n   response to the partner: a shout is answered either with a counter-shout\n   or with pointed quiet — but answered, not continued over.\n\n## 4. The body: the character's physical life\n\n**4.1 Physical state before psychology.** The body tells the story before\nthe first line. Set these parameters for every character:\n\n- **Center of gravity:** high (chest, chin — confidence, aggression, status)\n  or low (shoulders, slouch — fatigue, fear, submission).\n- **Tempo:** fast/ragged (nervousness, stimulant energy) or slow/economical\n  (control, threat — the most dangerous people move least).\n- **Openness:** squared shoulders and open palms vs crossed arms, dropped\n  head, closed poses.\n- **Breath:** high and rapid (panic) vs low and slow (control). Breath is\n  the most honest indicator of state; a clenched breath = a clenched\n  performance. Sound and physics must match: someone who just ran cannot\n  speak on a steady voice.\n\n**4.2 Business — the physical task.** A character almost always needs a\nDOING: they don't \"have a conversation\", they fix an engine, count money,\ncook, wipe a glass — and talk over the top of it. Business kills fake\ntheatricality (the hands are busy with truth), creates scene rhythm (pauses\nfill with action), and generates subtext (HOW a person counts money says\nmore than the words). **The interrupted-action rule:** the strongest accent\nis when a character STOPS the business. If he was slicing bread and stopped\nat a phrase — the phrase became an event. Use the stop as punctuation.\n\n**4.3 Proxemics — distance as drama.** The distance between characters is a\nvisible graph of their relationship: intimate zone (under 0.5 m) — love or\nviolence, entering uninvited is aggression, a threat whispered 10 cm from a\nface is scarier than shouting across a room; personal (0.5–1.2 m) — trust;\nsocial (1.2–3.5 m) — business, wariness; public (3.5+ m) — alienation,\nhierarchy. Scene drama is often just the story of distance: who closes it,\nwho breaks it, who freezes. **A change of distance = a change of beat.**\n\n**4.4 Status — the invisible hierarchy.** Status is what you DO, not who\nyou are. High status: an immobile head, slow movements, long gazes, pauses\nbefore answering, taking up space, touching other people's things. Low\nstatus: fussing, frequent self-touching (face, hair), broken speech,\nfiller-laughter, asking permission with the eyes. The most interesting\nthings in performance are **status breaks**: the boss who shows fear for one\nsecond; the underling who suddenly stops smiling. A powerful scene shape:\nenter high and collapse, or enter low and flip the room.\n\n## 5. Speech: how good acting sounds\n\n- Rhythm is written in the text — deliver it precisely; fast ≠ mushy.\n- Overlaps are normal (lines stepping on each other's tails), but key words\n  stay clean.\n- **Volume contrast: the most frightening things are said the quietest.**\n  Shouting is the currency of the weak; the character who owns the scene\n  lowers the volume and everyone leans in.\n- Pauses are events, not holes: a pause is legal only if something happens\n  inside it (an assessment, a decision, a refusal to answer).\n- Real speech has litter: interruptions, half-heard words, repetitions,\n  unfinished phrases. Perfectly constructed sentences kill street truth.\n\n---\n\n# PART II — WRITING THE ACTING: PROMPT ARCHITECTURE\n\n## 6. The character acting master profile\n\nEvery recurring character gets ONE master profile — the permanent source of\ntruth about how they act. It is written once, then adapted per scene (see\nsection 8). Target length: **150–220 words, one flowing paragraph**, all in\nEnglish, fully observable and filmable.\n\n**The template (block order is fixed):**\n\n```\nCharacter acting as [NAME]. [Age, build, physique, posture — the body as a\ndocument of their biography]. [The psychological engine in one clause — the\ninner drive that explains the physicality]. Vocal profile: [pitch/timbre,\naccent/origin, pace and delivery manner, and how the voice breaks or shifts\nunder emotion]. Key physical habits and tics: [signature tic with its\ntrigger; stress tic with its trigger; concealment behavior — what they do\nto hide what they feel; the facial mask and the exact condition under which\nit cracks]. Walking style: [the gait as characterization — named and\nspecific, with weight, rhythm and foot placement]. However, when [emotional\ntrigger], [the transformation — how the posture, gait and face change].\n[Optional: the softening target — the one person or thing that makes the\nface genuinely soften].\n```\n\n**Rules for writing each block:**\n\n1. **Only observable behavior.** Every inner state must have a body marker.\n   Never write \"he is nervous\" — write the trembling lower lip, the heavy\n   swallow, the long inhale through the mouth and sharp exhale through\n   pursed lips.\n2. **Every tic has a trigger.** Not \"he cracks his knuckles\" but \"he cracks\n   his knuckles during mundane conversations to fake confidence\". Format:\n   [tic] + [when/why]. Tics without triggers are decoration; tics with\n   triggers are dramaturgy.\n3. **Name the gait.** A memorable coined name inside quotes anchors the\n   biomechanics: a \"power-walk\", a \"peacock strut\", a \"gallery walk\", a\n   \"battering-ram stride\", a \"dreadnought pace\". Then unpack it: weight,\n   step, what the torso and arms do, what the head does.\n4. **Build in the mask AND the crack.** The single most cinematic device in\n   a profile is the conditional transformation: the facade and the precise\n   trigger that collapses it. A dominant swagger that crumbles into a\n   childlike slouch when rejected; a booming loudmouth whose face flashes\n   panicked inadequacy when family is mentioned; stern discipline that\n   melts into a radiant smile at one specific person. **Every profile\n   carries at least one \"However, when X — ...\" clause.** A character\n   playing two truths at once is the difference between a puppet and a\n   person.\n5. **One softening target.** Where it fits the character, give the face\n   exactly one person, animal or object for which it genuinely softens.\n   One — not two. This humanizes without diluting.\n6. **No wardrobe.** Clothing and costume live in the scene/look block of\n   the prompt, never in the acting profile. The profile must survive any\n   costume change.\n7. **No camera, no color.** Acting drives performance, face, voice and\n   motion only. Camera, grade and light live elsewhere in the prompt.\n8. **Physique carries biography.** Age, build and posture are chosen to\n   tell the backstory: a build \"weathered from past struggles\", shoulders\n   \"perpetually tense\", a posture \"over-corrected to project authority\".\n   The body is a document — profession, past injuries and self-image must\n   be readable in it.\n\n## 7. Eye life — mandatory in every profile and every scene\n\nDead eyes are the number-one tell of AI-generated acting. Give every\ncharacter continuous, naturalistic ocular life:\n\n- **Micro-saccades and gaze targeting** on whoever or whatever they attend\n  to; the gaze keeps moving — eyes drift, flick away in thought, scan to a\n  detail and settle back. They never lock frozen on a single point.\n- **Realistic blink rate and quality**, tied to state: rapid blink-bursts\n  under stress; slow calm lids in control; a blink-and-glaze on a moment of\n  dissociation.\n- **Live catchlights** — the eyes must read as wet, lit and alive.\n- **Controlled stillness is chosen, never dead.** If a character's register\n  is a near-unblinking predator calm, keep blinks rare, slow and\n  deliberate — a decision, not a freeze — and let the gaze still shift\n  slowly with intent.\n- **Eyes lead the thought.** The eyes reach the target a touch before the\n  head turns. Thought is readable in the eyes before the words come.\n- **Eye life reacts to the beat** like every other behavior: blink rate,\n  gaze steadiness and catchlight warmth all shift when the beat shifts.\n\n## 8. Scene adaptation — the master profile is rewritten, never pasted\n\nThe master profile is who the character IS. For each scene, REWRITE it into\nthe moment:\n\n1. **Present characters only.** Write an acting paragraph only for\n   characters actually in the shot. No character in frame → no paragraph.\n2. **Keep the constant core.** Identity, vocal profile, signature tics, eye\n   life and the emotional through-line stay the same in every scene — this\n   is what holds the character consistent across cuts. Never contradict the\n   master.\n3. **Re-express for this scene.** Select, emphasize, modify or drop\n   specific behaviors to fit the scene's posture (seated / standing /\n   running / hiding), action and beat, emotional state, and time of day.\n4. **Transform, don't delete.** A behavior that physically can't happen in\n   this scene is converted, not removed: a restless pacer slumped on a sofa\n   keeps the same nervous engine displaced into restless micro-sway,\n   wrist-flicks and paper-tearing. The energy is constant; its outlet\n   changes.\n5. **One flowing paragraph.** Fold the adaptation into prose in the\n   character's register — no bullet lists, no headers, no \"dial\" lines\n   inside the prompt.\n6. **Lead with the character's reference tag** if your pipeline uses asset\n   references, so the model binds the acting to the right person.\n\n## 9. Voice: fixed identity, never adapted\n\nActing is rewritten per scene; **voice is locked**. Each character gets one\nVoice prompt — their permanent vocal identity. When the character has a\nspoken line, paste the Voice prompt VERBATIM into the audio/voice field of\nthe prompt. Never modify it per scene. If the character appears but says\nnothing, omit it.\n\n**Voice prompt formula (1–2 sentences, quoted):**\n\n```\n\"A [age]-year-old [origin / accent descriptor]. [Timbre and register];\n[pace and delivery manner]; [emotional character — and how it shifts under\npressure].\"\n```\n\nThe vocal profile INSIDE the acting paragraph describes how speech behaves\ndramatically (tempo shifts, breaking registers, whispers); the Voice prompt\nin the audio field locks the sound itself. Both must agree with each other.\n\n## 10. States, not transitions\n\nVideo generation models fail transitions and nail states. Describe\ncharacters already IN the action state — mid-throw, mid-punch, mid-pace,\nmid-argument — not the process of getting there (\"reaches into the bag,\npulls out, winds up\" collapses; \"mid-throw, arm extended\" lands). Chain\nstates beat by beat instead of narrating continuous processes.\n\n## 11. Ensemble and space\n\n- **Group reactions travel in a wave, never in sync.** One person gets the\n  joke first, the second half a beat later, the third not at all.\n  Simultaneous identical reactions read as fake (unless a deliberately\n  choreographed comic sync is the point).\n- **The reaction is worth more than the action.** After every event, the\n  most valuable frame is the face of the person who saw it.\n- **Freeze at the threat.** Constant ensemble micro-movement — shifting\n  weight, gesturing, leaning — and at the key threat everything STOPS. The\n  contrast of bustle → stillness is punctuation.\n- **Movement = motivation.** Nobody crosses a room without an inner\n  impulse: toward something or away from something. Strong motivated\n  events: closing in (escalation), turning one's back (dismissal or\n  hiding the face), standing while the other sits (dominance grab),\n  sitting down mid-conflict (paradoxical power), stopping in the doorway\n  (the threshold = the decision point), starting to pack (ultimatum by\n  body).\n- **The strong are still and quiet; the weak fidget and shout.** Danger is\n  played not by the dangerous one but by the tension of everyone around\n  them. Threat without wind-up: no menacing pauses, no slow-motion turns —\n  in a truthful world violence arrives without an announcement.\n- **Degradation accumulates.** If a character is worn down across a story,\n  carry it in the body cumulatively — greyer, heavier, slower reactions —\n  never resetting between scenes.\n\n---\n\n# PART III — QUALITY CONTROL\n\n## 12. Atlas of bad acting — recognize and fix in the prompt\n\n| # | Symptom | How it looks | Prompt-level fix |\n|---|---|---|---|\n| 1 | Indication (mugging) | The face \"depicts\" the emotion: arched brows, grimaces | Remove the face from the task; write the objective and give the hands business |\n| 2 | Playing the result | The character plays the scene's outcome from second one | Write only what the character knows NOW |\n| 3 | Waiting for the cue | Empty face while the partner speaks | Write the reaction starting mid-line of the partner |\n| 4 | Monotactics | One color for the whole scene (all shouting / all whining) | Mark the beats; a new tactic verb for each |\n| 5 | Gesture illustration | Gesture duplicates the word (\"big\" — arms spread) | Gesture either precedes the thought, contradicts the words, or is absent |\n| 6 | Free emotion | Tears/rage with no build-up and no trigger event | Build the ladder: restraint → break; emotion must cost something |\n| 7 | Body false to biography | A thug with a dancer's posture; an addict with fresh plasticity | Set the body profile: center of gravity, tempo, wear |\n| 8 | Speech too clean for the class | A street character speaking in literary periods | Litter the speech: interruptions, dropped endings, repeats |\n| 9 | Threat signaling | \"Menacing\" pauses, squints, slow turns before violence | Threat is mundane; violence without wind-up |\n| 10 | Synchronized ensemble | Everyone reacts identically and at once | Stagger reactions in a wave, vary their strength |\n| 11 | Dead pauses | Silence in which nothing happens | Fill with assessment or business — or cut |\n| 12 | Emotional reset | The character instantly \"recovers\" after a strong event | States have inertia; the trail carries into the next beat |\n| 13 | Commenting the role | The performance winks at the viewer (\"we both know this is funny\") | Full belief in the circumstances; comedy is played dead serious |\n| 14 | Close-up overload | Active mimicry on a close-up | The tighter the shot, the less movement: only the eyes and the thought |\n| 15 | Dead eyes | Frozen stare, no blinks, no saccades, glassy catchlights | Apply section 7 in full — eye life is never optional |\n\n## 13. The performance scale (self-check)\n\n- **0 — Mannequin.** Text delivered, behavior absent.\n- **1 — Declaimer.** \"Expressive\" text, indicated emotions, illustrating body.\n- **2 — Diligent.** An objective can be guessed, but one tactic, late reactions, empty pauses.\n- **3 — Craftsman.** Objective and beats present, listens to the partner, body makes sense. Missing: subtext, surprising tactics, inertia of states.\n- **4 — Alive.** Continuous behavior, contrasting tactics, subtext diverging from text, status in the body, reactions ahead of lines, at least one unexpected-but-true choice.\n- **5 — Magnet.** All of \"4\" plus paradox: the character combines incompatibles — funny and frightening, cruel and charming, lying and touching. **The two-truths rule: at level 5 the character always plays TWO truths simultaneously** (helps — and hates it; apologizes — and defends; loves — and has already left). One clean emotion without contradiction reads as synthetic on a close-up.\n\nAim every hero shot at 4+; a paragraph that self-checks at 2 or below gets\nrewritten before it ships.\n\n## 14. Pre-send checklist\n\n- [ ] Objective as a verb aimed at a partner — for every character in frame\n- [ ] Obstacle and stakes exist; the cost of failure is real\n- [ ] 2–4 beat changes, each visible in behavior (pause / posture / tempo / gaze)\n- [ ] Reactions begin before the partner's lines end; assessment moments present\n- [ ] Every character has business; the interrupted-action accent is used deliberately\n- [ ] Distances change and the changes are motivated; status is in the body, not just the words\n- [ ] All tics carry triggers; the mask has its crack (\"However, when X...\")\n- [ ] Eye life written explicitly: saccades, blink quality, catchlights, eyes-lead-thought\n- [ ] Voice prompt pasted verbatim if the character speaks; omitted if silent\n- [ ] States not transitions; no wardrobe, camera or color inside the acting\n- [ ] Ensemble reactions staggered; strong = still, weak = fidgety\n- [ ] Scale check: would this paragraph score 4+?\n\n---\n\n# PART IV — WORKED EXAMPLE (invented character, use as a pattern)\n\n## 15. Master profile\n\n```\nCharacter acting as VIKTOR. Early 60s male, a retired night-shift taxi\ndriver and former amateur boxer; heavy, thick-necked build gone soft at the\nmiddle, with a flat-nosed face and old scar tissue over both eyebrows; sits\nand stands with a low, grounded center of gravity, weight always on the\nwhole foot. Runs on a single engine: decades of waiting — for fares, for\nrounds, for trouble — have made patience his weapon. Vocal profile: low,\nhoarse, unhurried baritone with a working-class rasp, short sentences\ndelivered flat and economical, dropping to a slower, quieter register the\nmore serious things get — he never speeds up. Key physical habits and tics:\nrolls an old coin across his knuckles when sizing a situation up; a slow,\naudible nose-breath before he says no; when lying is happening in front of\nhim, he goes completely still and lets a long silence do the pressing; his\ndefault face is a heavy-lidded, bored mask that conceals total attention.\nEye life: sleepy, hooded eyes with slow deliberate blinks and constant\nquiet scanning — mirrors, hands, exits — the gaze settling on a speaker a\nbeat before his head turns; catchlights low but alive. Walking style: a\nheavy, rolling \"old boxer's walk,\" short economical steps, shoulders level,\nhands loose and ready, never hurrying. However, when someone raises a hand\nnear him, the sleepy mask vanishes in a half-second: the chin drops, the\nhands rise halfway, the feet find their old stance — then he catches\nhimself and folds it away, embarrassed. His face only truly softens for\nstray dogs, which he feeds from his coat pocket.\n```\n\n**Voice (paste verbatim when VIKTOR speaks):** \"A 60-year-old ex-boxer and\nnight-cab driver, working-class city accent. Low, hoarse, unhurried\nbaritone; short flat economical sentences with long comfortable pauses;\ncalm and faintly amused, going quieter — never louder — as things get\nserious.\"\n\n## 16. Scene adaptation example\n\nScene: VIKTOR sits in his parked cab at night; a nervous young passenger in\nthe back seat is lying about having money for the fare.\n\n```\nVIKTOR sits motionless in the driver's seat, heavy and grounded, watching\nthe passenger in the rear-view mirror instead of turning around — his\nhooded eyes flick between the mirror, the passenger's hands and the door\nlock in slow, quiet scans, blinks rare and deliberate, the gaze settling\non the mirror a beat before his head ever moves. The old coin walks across\nhis knuckles on the seat-rest, unhurried; as the passenger's story falls\napart, the coin stops mid-roll — he lets the silence sit, takes one slow,\naudible breath through the nose, and answers in his low, hoarse baritone,\nflatter and quieter than before, never speeding up. Only when the kid's\nvoice cracks does the sleepy mask ease a fraction: a long exhale, a slow\nblink, the coin resuming its roll — patience choosing, for now, to be\nkind.\n```\n\nWhat happened here: the walk is irrelevant (seated) so its energy moved\ninto stillness and the coin; the signature tics kept their triggers (coin =\nsizing up, stopped coin = interrupted action as punctuation, nose-breath =\nrefusal, stillness + silence = pressure on a liar); the eye life obeys the\nmaster but is re-targeted to mirror, hands, lock; the beat changes are\nvisible (coin stops → silence → quieter voice → softening); the voice\nstayed untouched — it will be pasted verbatim into the audio field.\n\n---\n\n# FINAL AXIOMS\n\n1. Acting is behavior under pressure, not a demonstration of feelings.\n2. Listening matters more than speaking; reacting matters more than declaiming.\n3. Emotion is the consequence of a won or lost struggle, and it is expensive.\n4. The body is smarter than the words: when text and body conflict, the viewer believes the body.\n5. The strong are still and quiet; the weak fuss and shout. Exceptions are events.\n6. Every tic needs a trigger; every mask needs a crack.\n7. Every scene is somebody's defeat. If nobody lost, there was no scene.\n8. Subtext is not shown — it fails to be hidden.\n9. States, not transitions; the model films what is, not what becomes.\n10. When in doubt — cut. Less acting = more truth.\n";
+const SKILL_OUTLINE = ["ACTING SYSTEM", "Character Performance for AI Video Generation (Seedance 2.0)", "PART I — THE CRAFT: WHAT GOOD ACTING IS", "1. Definition", "2. The five pillars of every scene", "3. Listening and reaction — the main test of quality", "4. The body: the character's physical life", "5. Speech: how good acting sounds", "PART II — WRITING THE ACTING: PROMPT ARCHITECTURE", "6. The character acting master profile", "7. Eye life — mandatory in every profile and every scene", "8. Scene adaptation — the master profile is rewritten, never pasted", "9. Voice: fixed identity, never adapted", "10. States, not transitions", "11. Ensemble and space", "PART III — QUALITY CONTROL", "12. Atlas of bad acting — recognize and fix in the prompt", "13. The performance scale (self-check)", "14. Pre-send checklist", "PART IV — WORKED EXAMPLE (invented character, use as a pattern)", "15. Master profile", "16. Scene adaptation example", "FINAL AXIOMS"];
 
 /* 英→中 显示名：界面显示中文，写入提示词的仍是英文（视频模型按英文解析） */
 const ZH = {
@@ -438,7 +488,7 @@ function toast(msg, isErr){
  * ========================================================================= */
 const state = {
   view: 'brief',
-  folder: 'all',   /* 当前文件夹：all / shot1..shot5 / assets / final */
+  folder: 'all',   /* 当前文件夹：all / brief(页内项目信息) / shot1..shot7 / assets / final */
   file: null       /* 当前打开的素材 id（详情页） */
 };
 
@@ -446,11 +496,13 @@ const state = {
  * 4. 视图 A：项目 Brief
  * ========================================================================= */
 function renderBrief(){
-  const P = PROJECT, s = P.stats;
+  const P = PROJECT, s = P.stats, SK = P.skillFile;
   $('#crumbName').textContent = P.name;
   const wall = key => (P.elements[key] || []).map(e =>
-    '<div class="wcard"><div class="th"><img src="'+esc(srcOf(e.src, e.name))+'" data-ph="'+esc(e.name)+'" '
-    + 'onerror="phFallback(this)" alt=""></div>'
+    '<div class="wcard'+(e.video?' vclip':'')+'"'+(e.video?' data-act="play-final"':'')+'>'
+    + '<div class="th"><img src="'+esc(srcOf(e.src, e.name))+'" data-ph="'+esc(e.name)+'" '
+    + 'onerror="phFallback(this)" alt="">'
+    + (e.video ? '<span class="wplay">▶</span>' : '') + '</div>'
     + '<div class="nm"><b>'+esc(e.name)+'</b><i>'+esc(e.note || key)+'</i></div></div>').join('');
 
   $('#briefBody').innerHTML = `
@@ -472,6 +524,16 @@ function renderBrief(){
         <div><b>${s.duration}</b><i>时长</i></div>
         <div><b>${s.models}</b><i>模型</i></div>
       </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>成片 <em>Final cut</em></h2>
+    <div class="hint">《${esc(P.name)}》· ${esc(s.duration)} · 点击播放控件即可观看；视频随包分发，不需要联网。</div>
+    <div class="film">
+      <video id="finalPlayer" controls preload="metadata" playsinline poster="${esc(P.elements.Generations[0].src)}">
+        <source src="${esc(P.elements.Generations[0].video)}" type="video/mp4">
+      </video>
     </div>
   </div>
 
@@ -520,6 +582,25 @@ function renderBrief(){
     <div class="hint">角色、地点与道具只需创建一次，即可跨镜头、跨项目复用。</div>
     ${['Characters','Locations','Props','Generations'].map(k =>
       '<div class="wgroup"><h3>'+esc(zh(k))+'</h3><div class="wall">'+wall(k)+'</div></div>').join('')}
+  </div>
+
+  <div class="sec">
+    <h2>Skill 文件 <em>Acting system</em></h2>
+    <div class="hint">本项目表演层提示词所依据的方法文件，随包分发，可下载或直接在页面内阅读。</div>
+    <div class="skill">
+      <div class="sicon">MD</div>
+      <div class="sbody">
+        <b>${esc(SK.name)}</b>
+        <i>${esc(SK.note)} · ${esc(SK.size)} · ${SK.lines} 行 · ${SKILL_OUTLINE.length} 个章节</i>
+        <div class="sacts">
+          <a class="sbtn pri" href="${esc(SK.file)}" download="${esc(SK.name)}">⬇ 下载 .md</a>
+          <button class="sbtn" data-act="skill-outline">查看章节目录</button>
+          <button class="sbtn" data-act="skill-full">阅读全文</button>
+        </div>
+        <div class="soutline" id="skillOutline"><ul>${SKILL_OUTLINE.map(x => '<li>'+esc(x)+'</li>').join('')}</ul></div>
+        <div class="sfull" id="skillFull"><pre>${esc(SKILL_MD)}</pre></div>
+      </div>
+    </div>
   </div>`;
 }
 
@@ -665,16 +746,51 @@ function renderTree(){
   $('#tree').innerHTML =
     '<div class="tproj"><div class="tav"><img src="'+esc(PROJECT.cover)+'" onerror="phFallback(this)" alt=""></div>'
     + '<div class="tn"><b>'+esc(PROJECT.name)+'</b><i>'+esc(PROJECT.subtitle)+'</i></div></div>'
-    + '<div class="titem" data-act="tree" data-id="brief"><span class="ico">📄</span><span class="tl">Project brief</span></div>'
+    + '<div class="titem'+(state.folder==='brief'?' on':'')+'" data-act="tree" data-id="brief"><span class="ico">📄</span><span class="tl">Project brief · 项目信息</span></div>'
     + '<div class="thd">Folders</div>'
     + TREE.map(t =>
         '<div class="titem'+(state.folder===t.id?' on':'')+'" data-act="tree" data-id="'+t.id+'">'
         + '<span class="ico">'+(t.icon || '📁')+'</span><span class="tl">'+esc(t.name)+'</span>'
         + '<span class="tc">'+filesIn(t.id).length+'</span></div>').join('')
-    + '<div class="tfoot">Xumi Story. · 演示数据<br>shot 资产待补齐，补入 assets/ 后自动展示</div>';
+    + '<div class="tfoot">Xumi Story. · '+PROJECT.stats.shots+' 组镜头 · '+FILES.length+' 个素材<br>Skill 文件与成片均随包分发</div>';
+}
+
+/* 工作台内的「项目信息」面板：不切换视图，直接在右侧内容区展示基础信息 */
+function renderStudioBrief(){
+  const P = PROJECT, s = P.stats, SK = P.skillFile;
+  $('#farea').innerHTML =
+    '<div class="stbrief">'
+    + '<div class="fhead"><b>项目基础信息</b><span>'+esc(P.name)+'</span><span class="sp"></span>'
+    + '<span>工作台内查看，不离开当前页</span></div>'
+    + '<div class="hero"><div class="cover">'
+    +   '<img src="'+esc(P.cover)+'" data-ph="'+esc(P.name)+'" onerror="phFallback(this)" alt="">'
+    +   '<div class="fade"></div><div class="tag">'+esc(P.model)+'</div></div>'
+    + '<div class="body"><h1>'+esc(P.name)+'</h1><div class="sub">'+esc(P.subtitle)+'</div>'
+    +   '<div class="desc">'+esc(P.desc)+'</div>'
+    +   '<div class="metarow"><div class="tags">'
+    +     P.tags.map(t => '<span>'+esc(t)+'</span>').join('') + '</div></div>'
+    +   '<div class="stat">'
+    +     '<div><b>'+s.shots+'</b><i>镜头</i></div>'
+    +     '<div><b>'+s.elements+'</b><i>资产</i></div>'
+    +     '<div><b>'+esc(s.duration)+'</b><i>时长</i></div>'
+    +     '<div><b>'+s.models+'</b><i>模型</i></div>'
+    +   '</div></div></div>'
+    + '<div class="sec"><h2>创作过程 <em>How it was made</em></h2><div class="tl">'
+    +   P.timeline.map(t => '<div class="item '+t.s+'"><div class="t">'+esc(t.t)
+    +     (t.s==='now'?'<i>· 进行中</i>':'')+'</div><div class="d">'+esc(t.d)+'</div></div>').join('')
+    + '</div></div>'
+    + '<div class="sec"><h2>Skill 文件 <em>Acting system</em></h2>'
+    +   '<div class="hint">本项目表演层提示词所依据的方法文件，随包分发。</div>'
+    +   '<div class="skill"><div class="sicon">MD</div><div class="sbody">'
+    +     '<b>'+esc(SK.name)+'</b><i>'+esc(SK.note)+' · '+esc(SK.size)+' · '+SK.lines+' 行</i>'
+    +     '<div class="sacts"><a class="sbtn pri" href="'+esc(SK.file)+'" download="'+esc(SK.name)+'">⬇ 下载 .md</a></div>'
+    +   '</div></div>'
+    + '</div>'
+    + '</div>';
 }
 
 function renderFiles(){
+  if (state.folder === 'brief'){ renderStudioBrief(); return; }
   const list = filesIn(state.folder);
   const meta = TREE.find(t => t.id === state.folder) || { name:'全部资产' };
   $('#farea').innerHTML =
@@ -789,12 +905,21 @@ document.addEventListener('click', e => {
   const act = t.dataset.act;
 
   if (act === 'goto-studio'){ goto('studio'); return; }
-  if (act === 'goto-brief'){ goto('brief'); return; }
+  if (act === 'goto-brief'){
+    state.folder = 'brief'; state.file = null; renderTree(); renderFiles(); return;
+  }
+  if (act === 'play-final'){
+    const v = $('#finalPlayer');
+    if (v){ v.scrollIntoView({behavior:'smooth',block:'center'}); v.play().catch(()=>{}); }
+    return;
+  }
+  if (act === 'skill-outline'){ const el = $('#skillOutline'); if (el) el.classList.toggle('open'); return; }
+  if (act === 'skill-full'){ const el = $('#skillFull'); if (el) el.classList.toggle('open'); return; }
   if (act === 'ptoggle'){ t.classList.toggle('open'); return; }
 
   if (act === 'tree'){
-    if (t.dataset.id === 'brief'){ goto('brief'); return; }
     state.folder = t.dataset.id;
+    state.file = null;
     renderTree(); renderFiles();
     return;
   }
