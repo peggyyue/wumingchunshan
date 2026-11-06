@@ -269,9 +269,58 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
   border-radius:8px;padding:12px;max-height:430px;overflow:auto;color:#b6c0d1;}
 
 /* --- 工作台：页内项目基础信息 --- */
-.stbrief{max-width:780px;}
-.stbrief .hero .cover{height:200px;}
-.stbrief .sec{margin-top:24px;}
+#farea.briefmode{background:var(--bg);}
+.stbrief{max-width:760px;margin:0 auto;padding:6px 0 90px;}
+.stbrief .fhead{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:34px;}
+.stbrief .bhead{text-align:center;margin-bottom:26px;}
+.stbrief .bhead .updated{font-size:10.5px;letter-spacing:.1em;color:var(--txt3);text-transform:uppercase;}
+.stbrief .bhead h1{font-size:32px;font-weight:800;letter-spacing:-.4px;margin:10px 0 6px;}
+.stbrief .bhead .sub{font-size:12.5px;color:var(--txt2);}
+.stbrief .logline{font-size:14.5px;line-height:1.95;color:#d7deeb;max-width:620px;
+  margin:20px auto 0;text-align:left;}
+.stbrief .bcover{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#161b25;}
+.stbrief .bcover img{display:block;width:100%;}
+.stbrief .csec{margin-top:44px;border-top:1px solid var(--line);padding-top:26px;}
+.stbrief .csec.first{border-top:0;padding-top:0;margin-top:38px;}
+.stbrief .stag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:700;}
+.stbrief .csec h2{font-size:18px;font-weight:700;margin:8px 0 14px;letter-spacing:-.2px;}
+.stbrief .cbody{font-size:13px;line-height:2.05;color:#c2cadb;}
+.stbrief .cbody p{margin-bottom:13px;}
+.stbrief .hint{font-size:11.5px;color:var(--txt3);line-height:1.8;margin-top:10px;}
+.stbrief .toolbox{margin-top:20px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:14px 16px;}
+.stbrief .toolbox .tl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:9px;}
+.stbrief .toolbox li{list-style:none;font-size:12.5px;color:var(--txt2);line-height:2.1;}
+.stbrief .toolbox li b{color:var(--txt);font-weight:600;}
+.stbrief .miniwall{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px;}
+.stbrief .mini{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel);}
+.stbrief .mini img{width:100%;height:86px;object-fit:cover;display:block;}
+.stbrief .mini span{display:block;font-size:10.5px;padding:6px 8px;color:#cbd4e2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stbrief .apair{display:flex;gap:16px;border:1px solid var(--line);border-radius:11px;
+  background:var(--panel);padding:14px;margin-top:12px;}
+.stbrief .apair .apimg{width:180px;flex-shrink:0;}
+.stbrief .apair .apimg img{width:100%;border-radius:8px;display:block;}
+.stbrief .apair .aptxt{flex:1;min-width:0;font-size:12px;line-height:1.9;color:var(--txt2);}
+.stbrief .apair .aptxt b{display:block;font-size:13px;color:var(--txt);margin-bottom:5px;}
+.stbrief .apair .aptxt .at{font-size:11px;color:var(--blue);}
+.stbrief details{margin-top:10px;}
+.stbrief summary{cursor:pointer;font-size:11.5px;color:#cfd7e4;list-style:none;}
+.stbrief summary::-webkit-details-marker{display:none;}
+.stbrief summary:before{content:'▸ ';color:var(--blue);}
+.stbrief details[open] summary:before{content:'▾ ';}
+.stbrief .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.9;
+  white-space:pre-wrap;word-break:break-word;background:#11151d;border:1px solid var(--line);
+  border-radius:9px;padding:13px 14px;color:#b6c0d1;margin-top:12px;max-height:330px;overflow:auto;}
+.stbrief .shotimg{margin-top:16px;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.stbrief .shotimg img{width:100%;display:block;}
+.stbrief .shotimg .cap{font-size:11px;color:var(--txt3);padding:8px 12px;background:var(--panel);}
+.stbrief .film{margin-top:16px;}
+.stbrief .film video{max-height:460px;}
+@media(max-width:900px){
+  .stbrief .miniwall{grid-template-columns:repeat(2,1fr);}
+  .stbrief .apair{flex-direction:column;}
+  .stbrief .apair .apimg{width:100%;}
+}
 </style>
 </head>
 <body>
@@ -311,7 +360,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 /* ══════════════════════════════════════════════════════════════════════
  * 编辑速查表（Ctrl+F 搜「编辑区」直达，日常改动只需碰这几处）
  *
- *   [编辑区 1]  PROJECT            —— 项目名 / 简介 / 封面 / 标签 / 统计 / 时间线 / skillFile
+ *   [编辑区 1]  PROJECT            —— 项目名 / 简介 / 封面 / 标签 / 统计 / 时间线 / skillFile / story
  *                                    · prompts：5 个 shot 的画面描述、首帧与视频提示词
  *                                    · elements：Brief 页资产墙的图片与说明
  *   [编辑区 2]  SUBJECTS           —— assets 文件夹里的 7 张主体图 + 各自提示词
@@ -334,7 +383,7 @@ const PROJECT = {
   cover: 'assets/无明春山-封面.webp',
   tags: ['游戏运营', '志怪民俗', '电影写实', '国风写实', '低饱和青绿'],
   stats: { shots: 7, elements: 8, duration: '2:16', models: 2 },
-  model: 'GPT 2.0（首帧） · Seedance 2.5（视频）',
+  model: 'GPT 2.0（首帧、主体图） · Seedance 2.5（视频）',
   timeline: [
     { t: '剧本',     d: '四幕志怪短剧一次输入：起·她被选中 / 承·她在变化 / 转·她走进茧 / 合·蛾群升空与空茧，120 秒时间戳分镜与声音设计总则同步给出。', s: 'done' },
     { t: '主体设定', d: 'GPT 2.0 生成 Elements：阿绣（三视图）、姐姐、幼年阿绣、阿绣的屋子、山村晒场祭台、干枯蛾翅、蓝色绣花鞋。', s: 'done' },
@@ -409,6 +458,38 @@ const PROJECT = {
     file:'assets/ACTING-SKILL.md',
     size:'25 KB',
     lines:444
+  },
+  story: {
+    updated: '2026/11/06',
+    logline: '古代中式山村，年轻村女阿绣被村民选为祭品，吞下干蛾翅后身体悄然异变。'
+      + '她在幽绿灯火与低声吟唱里一步步走向祭台的人形蚕茧，在众人虔诚的注视中完成蜕变'
+      + '——而姐姐留下的那双蓝色绣花鞋，让这场献祭带上宿命轮回与诡谲哀伤的底色。',
+    about: [
+      '《无明春山》是一支 2 分 16 秒的游戏衍生剧情片，中式志怪民俗恐怖。全片由 AI 生成，'
+        + '没有实拍、没有布景、没有摄影机；7 组镜头按「切黑 + 音效延续」衔接，全程无 BGM，只保留环境音与低频心跳。',
+      '制作里最花力气的是两件事：一是让低饱和青绿、潮湿雾气与幽绿烛火在每一镜里都守得住；'
+        + '二是把「身体正在变化」写成皮肤、指尖与听觉的细节——禁怪物、禁血腥、禁夸张变形、禁任何字幕，'
+        + '恐惧只从她把异变误认作仙缘的那一刻里长出来。每个镜头先出多版非定稿，再收敛到定稿。'
+    ],
+    tools: [
+      { name:'GPT 2.0', use:'首帧、主体图' },
+      { name:'Seedance 2.5', use:'视频' }
+    ],
+    c1: '一个资产是一组「文字 + 图像」：文字描述符逐字写进每一条提示词，图像负责把模型锚住。'
+      + '项目登记了 8 个主体——阿绣、姐姐、幼年阿绣、山村晒场祭台、阿绣的屋子、干枯蛾翅、蓝色绣花鞋，'
+      + '以及蛾仙四视图变体。工作台里每条提示词的主体都以 @名称 高亮，点开 descriptor 就能看到原文。',
+    c2: '每一条视频提示词都以同一段风格前缀开头，先把色调、空气、颗粒和光比钉死，再写镜头内容。',
+    c3: '10 镜分镜表《蛾仙选祭录》最后合并为 7 组镜头。每组先出多版非定稿，再收敛到定稿；'
+      + 'shot1 的 8 版非定稿共用一条提示词，定稿2 则换成参考生视频，只挂主体形象与场景参考，'
+      + '并明确要求切换构图。完整素材与逐镜提示词在左侧文件树里查看。',
+    c4: '跨镜最容易散掉的是物件与身体的连续性：蓝色绣花鞋、干蛾翅、空蚕茧、湿丝、尚未展开的湿翼，'
+      + '在各自镜头里都被重新点名一次。表演层照 ACTING SKILL.md 写——表演是压力下的行为，不是情绪的展示；'
+      + '写状态而不是转变，眼睛先于台词。',
+    c5: '7 段定稿按「切黑 + 音效延续」衔接成 2 分 16 秒成片，全片无 BGM。压缩版随包分发，点开即可播放。',
+    assetNotes: {
+      'a-azxiu': '主角 · 三视图设定。描述符里锁住双辫、圆眼、旧式浅色布衣，以及颈肩若隐若现的细密鳞纹，让「她在变」从第一张设定图就埋下。',
+      'a-shoes': '情感锚点 · 姐姐遗物。它从童年的礼物一路滚到成片末尾——一枚空蚕茧停在鞋旁，鳞粉缓缓覆上。跨镜靠的就是这类可复用的具象物件。'
+    }
   },
   results: [
     { id:'r1', title:'最终成片 · 2:16', dur:'2:16', src:'assets/无明春山-封面.webp', video:'assets/无明春山.mp4', params:['Seedance 2.5','5 镜头','切黑衔接','无 BGM'] },
@@ -755,42 +836,72 @@ function renderTree(){
     + '<div class="tfoot">Xumi Story. · '+PROJECT.stats.shots+' 组镜头 · '+FILES.length+' 个素材<br>Skill 文件与成片均随包分发</div>';
 }
 
-/* 工作台内的「项目信息」面板：不切换视图，直接在右侧内容区展示基础信息 */
+/* 工作台内的「项目信息」面板：版心居中的编辑式长文，不切换视图 */
 function renderStudioBrief(){
-  const P = PROJECT, s = P.stats, SK = P.skillFile;
+  const P = PROJECT, ST = P.story, SK = P.skillFile;
+  $('#farea').classList.add('briefmode');
+
+  const csec = (no, tag, title, body, extra) =>
+    '<div class="csec'+(no?'':' first')+'">'
+    + '<div class="stag">'+esc(no ? no+' · '+tag : tag)+'</div>'
+    + (title ? '<h2>'+esc(title)+'</h2>' : '')
+    + '<div class="cbody">'+(Array.isArray(body) ? body.map(p => '<p>'+esc(p)+'</p>').join('')
+        : '<p>'+esc(body)+'</p>')+'</div>'
+    + (extra || '') + '</div>';
+
+  const miniwall = '<div class="miniwall">'
+    + SUBJECTS.map(x => '<div class="mini"><img src="'+esc(x.src)+'" data-ph="'+esc(x.name)
+      + '" onerror="phFallback(this)" alt=""><span>@'+esc(x.name)+'</span></div>').join('')
+    + '</div>';
+
+  const apair = id => {
+    const x = SUBJECTS.find(a => a.id === id);
+    if (!x) return '';
+    return '<div class="apair"><div class="apimg"><img src="'+esc(x.src)+'" data-ph="'+esc(x.name)
+      + '" onerror="phFallback(this)" alt=""></div>'
+      + '<div class="aptxt"><b>'+esc(x.name)+'</b><span class="at">@'+esc(x.name)+'</span>'
+      + '<div style="margin-top:6px">'+esc(ST.assetNotes[id] || '')+'</div>'
+      + '<details><summary>查看完整 descriptor</summary><pre class="code">'+esc(x.prompt)+'</pre></details>'
+      + '</div></div>';
+  };
+
+  const prefix = SP1.draft.split('\n')[0];
+  const styleBlock = '<pre class="code">'+esc(prefix)+'</pre>';
+  const shotImg = '<div class="shotimg"><img src="assets/shot4首帧图.webp" alt="">'
+    + '<div class="cap">shot4 · 首帧分镜图（湿丝封茧）</div></div>';
+  const final2Block = '<pre class="code">'+esc(SP1.final2)+'</pre>';
+  const skillCard = '<div class="skill" style="margin-top:16px"><div class="sicon">MD</div>'
+    + '<div class="sbody"><b>'+esc(SK.name)+'</b><i>'+esc(SK.note)+' · '+esc(SK.size)+' · '+SK.lines+' 行</i>'
+    + '<div class="sacts"><a class="sbtn pri" href="'+esc(SK.file)+'" download="'+esc(SK.name)+'">⬇ 下载 .md</a></div>'
+    + '</div></div>';
+  const player = '<div class="film"><video controls preload="metadata" playsinline poster="'+esc(P.cover)+'">'
+    + '<source src="'+esc(MP4)+'" type="video/mp4"></video></div>'
+    + '<div class="hint">720p 压缩版随包分发；原始 1080p60 版保留在本地源目录。</div>';
+
+  const tools = '<div class="toolbox"><span class="tl">The tools</span><ul>'
+    + ST.tools.map(t => '<li><b>'+esc(t.name)+'</b>（'+esc(t.use)+'）</li>').join('')
+    + '</ul></div>';
+
   $('#farea').innerHTML =
     '<div class="stbrief">'
-    + '<div class="fhead"><b>项目基础信息</b><span>'+esc(P.name)+'</span><span class="sp"></span>'
-    + '<span>工作台内查看，不离开当前页</span></div>'
-    + '<div class="hero"><div class="cover">'
-    +   '<img src="'+esc(P.cover)+'" data-ph="'+esc(P.name)+'" onerror="phFallback(this)" alt="">'
-    +   '<div class="fade"></div><div class="tag">'+esc(P.model)+'</div></div>'
-    + '<div class="body"><h1>'+esc(P.name)+'</h1><div class="sub">'+esc(P.subtitle)+'</div>'
-    +   '<div class="desc">'+esc(P.desc)+'</div>'
-    +   '<div class="metarow"><div class="tags">'
-    +     P.tags.map(t => '<span>'+esc(t)+'</span>').join('') + '</div></div>'
-    +   '<div class="stat">'
-    +     '<div><b>'+s.shots+'</b><i>镜头</i></div>'
-    +     '<div><b>'+s.elements+'</b><i>资产</i></div>'
-    +     '<div><b>'+esc(s.duration)+'</b><i>时长</i></div>'
-    +     '<div><b>'+s.models+'</b><i>模型</i></div>'
-    +   '</div></div></div>'
-    + '<div class="sec"><h2>创作过程 <em>How it was made</em></h2><div class="tl">'
-    +   P.timeline.map(t => '<div class="item '+t.s+'"><div class="t">'+esc(t.t)
-    +     (t.s==='now'?'<i>· 进行中</i>':'')+'</div><div class="d">'+esc(t.d)+'</div></div>').join('')
-    + '</div></div>'
-    + '<div class="sec"><h2>Skill 文件 <em>Acting system</em></h2>'
-    +   '<div class="hint">本项目表演层提示词所依据的方法文件，随包分发。</div>'
-    +   '<div class="skill"><div class="sicon">MD</div><div class="sbody">'
-    +     '<b>'+esc(SK.name)+'</b><i>'+esc(SK.note)+' · '+esc(SK.size)+' · '+SK.lines+' 行</i>'
-    +     '<div class="sacts"><a class="sbtn pri" href="'+esc(SK.file)+'" download="'+esc(SK.name)+'">⬇ 下载 .md</a></div>'
-    +   '</div></div>'
-    + '</div>'
+    + '<div class="fhead"><b>项目基础信息</b><span>'+esc(P.name)+'</span><span class="sp"></span></div>'
+    + '<div class="bhead"><div class="updated">Updated '+esc(ST.updated)+'</div>'
+    +   '<h1>'+esc(P.name)+'</h1><div class="sub">'+esc(P.subtitle)+'</div>'
+    +   '<div class="logline">'+esc(ST.logline)+'</div></div>'
+    + '<div class="bcover"><img src="'+esc(P.cover)+'" data-ph="'+esc(P.name)
+    +   '" onerror="phFallback(this)" alt=""></div>'
+    + csec('', 'About the project', '', ST.about, tools)
+    + csec('01', 'PRE-PRODUCTION', '资产', ST.c1, miniwall + apair('a-azxiu') + apair('a-shoes'))
+    + csec('02', 'PRE-PRODUCTION', '风格锁在提示词里', ST.c2, styleBlock)
+    + csec('03', 'PRODUCTION', '分镜与版本迭代', ST.c3, shotImg + final2Block)
+    + csec('04', 'PRODUCTION', '跨镜锚点与表演层', ST.c4, skillCard)
+    + csec('05', 'PRODUCTION', '成片', ST.c5, player)
     + '</div>';
 }
 
 function renderFiles(){
   if (state.folder === 'brief'){ renderStudioBrief(); return; }
+  $('#farea').classList.remove('briefmode');
   const list = filesIn(state.folder);
   const meta = TREE.find(t => t.id === state.folder) || { name:'全部资产' };
   $('#farea').innerHTML =
@@ -819,6 +930,7 @@ const drow = (k, v) => '<div class="row"><span class="k">'+k+'</span><span class
 function renderDetail(){
   const f = findFile(state.file);
   if (!f) return renderFiles();
+  $('#farea').classList.remove('briefmode');
   const hasVideo = f.type === 'video' && f.video;
   $('#farea').innerHTML =
     '<div class="detail">'
