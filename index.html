@@ -34,6 +34,24 @@ button{font-family:inherit;}
 .btn.pri:disabled{opacity:.55;cursor:default;filter:none;}
 .btn.gh{background:transparent;}
 .btn.sm{padding:4px 9px;font-size:11.5px;}
+.product-link{font:inherit;font-size:11.5px;color:var(--txt2);background:none;border:0;
+  padding:3px 0;text-decoration:none;cursor:pointer;white-space:nowrap;transition:color .15s;}
+.product-link:hover{color:var(--txt);text-decoration:underline;text-underline-offset:3px;}
+.product-link:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:2px;}
+.product-links{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;margin-top:14px;}
+.product-links .platform-note{font-size:11px;color:var(--txt2);}
+.client-dialog{position:fixed;inset:0;margin:auto;width:min(440px,calc(100vw - 40px));
+  max-height:calc(100vh - 40px);overflow:auto;padding:24px;background:var(--panel);color:var(--txt);
+  border:1px solid var(--line2);border-radius:12px;box-shadow:0 20px 70px rgba(0,0,0,.4);}
+.client-dialog::backdrop{background:rgba(0,0,0,.6);}
+.client-dialog h2{font-size:17px;margin-bottom:16px;padding-right:26px;}
+.client-dialog p{font-size:12.5px;line-height:1.9;color:var(--txt2);}
+.client-dialog .client-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px;}
+.client-dialog .client-actions a{text-decoration:none;display:inline-block;}
+.client-dialog .client-actions span{font-size:11.5px;color:var(--txt2);}
+.client-dialog .client-close{position:absolute;right:16px;top:16px;font-size:18px;padding:0 5px;}
+@media(max-width:700px){.topbar{flex-wrap:wrap;height:auto;min-height:48px;padding-top:8px;padding-bottom:8px;}
+  .topbar .cred{display:none;}.topbar .product-link{white-space:normal;}}
 
 .chip{font-size:11.5px;padding:4px 9px;border-radius:20px;border:1px solid var(--line);
   background:var(--panel2);color:#b9c2d2;cursor:pointer;transition:.13s;user-select:none;}
@@ -383,6 +401,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
     <div class="pname" id="topName">—</div>
     <div class="sp"></div>
     <div class="cred">GPT 2.0 · Seedance 2.5</div>
+    <a class="product-link" id="studioWebLink" target="_blank" rel="noopener">前往 Xumi Story Web 端 ↗</a>
+    <button class="product-link" data-act="client-info" aria-haspopup="dialog" aria-controls="clientDialog">Windows 客户端</button>
     <button class="btn sm" data-act="goto-brief">项目信息</button>
   </div>
 
@@ -393,6 +413,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 </div>
 
 <div class="toast" id="toast"></div>
+
+<dialog class="client-dialog" id="clientDialog" aria-labelledby="clientDialogTitle" aria-describedby="clientDialogNote">
+  <button class="product-link client-close" data-act="client-close" aria-label="关闭">×</button>
+  <h2 id="clientDialogTitle">Xumi Story 客户端</h2>
+  <p id="clientDialogNote">已安装？直接打开本机的 Xumi Story 客户端即可。<br>如果你正从客户端查看本页，无需再次下载。</p>
+  <div class="client-actions">
+    <a class="btn" id="clientDownloadLink" target="_blank" rel="noopener">下载 Windows 版</a>
+    <span>macOS 版敬请期待</span>
+  </div>
+</dialog>
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════
@@ -412,6 +442,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
  *   改完直接刷新浏览器即可，无需构建、无需安装依赖。
  * ══════════════════════════════════════════════════════════════════════ */
 /* [编辑区 1] 项目基础信息 + prompts + elements */
+const WEB = 'https://xumi-story.woa.com';
+const EXE = 'https://github.com/peggyyue/wumingchunshan/releases/download/v1.0/XumiStory.exe';
 const PROJECT = {
   name: '无明春山',
   subtitle: '游戏衍生剧情片 · 中式志怪民俗恐怖短片',
@@ -643,6 +675,11 @@ function renderBrief(){
         <div><b>${s.elements}</b><i>资产</i></div>
         <div><b>${s.duration}</b><i>时长</i></div>
         <div><b>${s.models}</b><i>模型</i></div>
+      </div>
+      <div class="product-links" aria-label="Xumi Story 产品入口">
+        <a class="product-link" href="${WEB}" target="_blank" rel="noopener">前往 Xumi Story Web 端 ↗</a>
+        <button class="product-link" data-act="client-info" aria-haspopup="dialog" aria-controls="clientDialog">Windows 客户端</button>
+        <span class="platform-note">macOS 版敬请期待</span>
       </div>
     </div>
   </div>
@@ -1208,6 +1245,8 @@ document.addEventListener('click', e => {
   if (!t) return;
   const act = t.dataset.act;
 
+  if (act === 'client-info'){ $('#clientDialog').showModal(); return; }
+  if (act === 'client-close'){ $('#clientDialog').close(); return; }
   if (act === 'goto-studio'){
     state.folder = 'brief'; state.file = null; goto('studio'); return;
   }
@@ -1249,11 +1288,14 @@ document.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
+  if ($('#clientDialog').open) return;
   if (state.view === 'studio' && state.file) closeFile();
   else if (state.view === 'studio') goto('brief');
 });
 
 /* 启动 */
+$('#studioWebLink').href = WEB;
+$('#clientDownloadLink').href = EXE;
 renderBrief();
 goto('brief');
 </script>
